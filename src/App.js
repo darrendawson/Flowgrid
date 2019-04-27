@@ -12,7 +12,7 @@ class App extends Component {
     let rootNodeID = flowchart['rootNodeID'];
     let endNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
 
-    flowchart = this.insertEmptyIfNode(flowchart, rootNodeID, endNodeID);
+    flowchart = this.insertEmptyIfNode(flowchart, rootNodeID);
 
     this.state = {
       flowchart: flowchart
@@ -54,9 +54,10 @@ class App extends Component {
   // [New Node]
   //      |
   // [Child Node]
-  insertEmptyCommandNode = (flowchart, parentNodeID, childNodeID, branchTakenIsTrue = false) => {
+  insertEmptyCommandNode = (flowchart, parentNodeID, branchTakenIsTrue = false) => {
 
     // add node to flowchart and have it point at child
+    let childNodeID = this.getChildNodeID(flowchart, parentNodeID, branchTakenIsTrue);
     let newNodeID = this.getNewNodeID(flowchart);
     let newNode = {nodeID: newNodeID, nodeType: "COMMAND", nextNodeID: childNodeID};
     flowchart['flow'][newNodeID] = newNode;
@@ -82,7 +83,10 @@ class App extends Component {
   // [New Merge Node]
   //      |
   // [Child Node]
-  insertEmptyIfNode = (flowchart, parentNodeID, childNodeID, branchTakenIsTrue = false) => {
+  insertEmptyIfNode = (flowchart, parentNodeID, branchTakenIsTrue = false) => {
+
+    // get what the child of the current parent 
+    let childNodeID = this.getChildNodeID(flowchart, parentNodeID, branchTakenIsTrue);
 
     // get nodeIDs for all the newly generated nodes
     let ifNodeID = this.getNewNodeID(flowchart);
@@ -144,6 +148,24 @@ class App extends Component {
     }
 
     return flowchart;
+  }
+
+
+  // gets the ID for the child of a node
+  // -> handles situation where the parent is an IF and needs to branch
+  getChildNodeID = (flowchart, parentNodeID, branchTakenIsTrue = false) => {
+
+    let parentNode = flowchart['flow'][parentNodeID];
+
+    if (parentNode['nodeType'] === "IF") {
+      if (branchTakenIsTrue) {
+        return parentNode['nextNodeID_IfTrue'];
+      } else {
+        return parentNode['nextNodeID_IfFalse'];
+      }
+    } else {
+      return parentNode['nextNodeID'];
+    }
   }
 
 
