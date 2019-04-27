@@ -10,7 +10,7 @@ class Flowchart extends Component {
   render() {
     return (
       <div id="Flowchart">
-
+        <p>{JSON.stringify(this.props.flowchart)}</p>
       </div>
     );
   }
