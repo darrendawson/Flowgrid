@@ -9,7 +9,10 @@ class App extends Component {
     super();
 
     let flowchart = this.createEmptyFlowchart();
+    let rootNodeID = flowchart['rootNodeID'];
+    let endNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
 
+    flowchart = this.insertEmptyIfNode(flowchart, rootNodeID, endNodeID);
     this.state = {
       flowchart: flowchart
     }
@@ -43,6 +46,104 @@ class App extends Component {
   }
 
 
+  // inserts an empty command node into the flowchart between parent and child
+  // if the parent is an IF node, then rewriting parent['nextNodeID'] will actually be parent['nextNodeID_IfTrue/False']
+  // [parent Node]
+  //      |
+  // [New Node]
+  //      |
+  // [Child Node]
+  insertEmptyCommandNode = (flowchart, parentNodeID, childNodeID, branchTakenIsTrue = false) => {
+
+    // add node to flowchart and have it point at child
+    let newNodeID = this.getNewNodeID(flowchart);
+    let newNode = {nodeID: newNodeID, nodeType: "COMMAND", nextNodeID: childNodeID};
+    flowchart['flow'][newNodeID] = newNode;
+
+    // rewrite parent so it'll point at the new node instead of the child node
+    flowchart = this.redirectParentNode(flowchart, parentNodeID, newNodeID, branchTakenIsTrue);
+
+    return flowchart;
+  }
+
+
+  // inserts an empty IF node into flowchart between parent and child
+  // - inserts a bunch of other nodes to make it work
+  //
+  // [Parent Node]
+  //      |
+  // [New IF Node]  ------- [New Command Node]
+  //      |                         |
+  // [New Command Node]             |
+  //      |                         |
+  //      |--------------------------
+  //      |
+  // [New Merge Node]
+  //      |
+  // [Child Node]
+  insertEmptyIfNode = (flowchart, parentNodeID, childNodeID, branchTakenIsTrue = false) => {
+
+    // get nodeIDs for all the newly generated nodes
+    let ifNodeID = this.getNewNodeID(flowchart);
+    flowchart['flow'][ifNodeID] = 1;
+    let ifFalseNodeID = this.getNewNodeID(flowchart);
+    flowchart['flow'][ifFalseNodeID] = 1;
+    let ifTrueNodeID = this.getNewNodeID(flowchart);
+    flowchart['flow'][ifTrueNodeID] = 1;
+    let mergeNodeID = this.getNewNodeID(flowchart);
+    flowchart['flow'][mergeNodeID] = 1;
+
+
+    // rewrite parentNode so it points at the new IfNode
+    flowchart = this.redirectParentNode(flowchart, parentNodeID, ifNodeID, branchTakenIsTrue);
+
+    // create new IF node and add it to flowchart
+    flowchart['flow'][ifNodeID] = {
+      nodeID: ifNodeID,
+      nodeType: "IF",
+      nextNodeID_IfTrue: ifTrueNodeID,
+      nextNodeID_IfFalse: ifFalseNodeID,
+      mergeNodeID: mergeNodeID
+    };
+
+    // create the ifTrue and ifFalse command Nodes and add them to flowchart
+    flowchart['flow'][ifFalseNodeID] = {
+      nodeID: ifFalseNodeID,
+      nodeType: "COMMAND",
+      nextNodeID: mergeNodeID
+    };
+
+    flowchart['flow'][ifTrueNodeID] = {
+      nodeID: ifTrueNodeID,
+      nodeType: "COMMAND",
+      nextNodeID: mergeNodeID
+    }
+
+    // add the mergeNode to the flowchart
+    flowchart['flow'][mergeNodeID] = {
+      nodeID: mergeNodeID,
+      nodeType: "MERGE",
+      nextNodeID: childNodeID
+    };
+
+    return flowchart;
+  }
+
+
+
+  // convenience function for properly pointing a parent at a child
+  // handles cases where parent is a commandNode or an IfNode
+  redirectParentNode = (flowchart, parentNodeID, childNodeID, branchTakenIsTrue = false) => {
+
+    if (flowchart['flow'][parentNodeID]['nodeType'] === "IF") {
+      let branchTaken = (branchTakenIsTrue) ? "nextNodeID_IfTrue" : "nextNodeID_IfFalse";
+      flowchart['flow'][parentNodeID][branchTaken] = childNodeID;
+    } else {
+      flowchart['flow'][parentNodeID]['nextNodeID'] = childNodeID;
+    }
+
+    return flowchart;
+  }
 
 
   // nodes have unique String IDs that are randomly generated.
