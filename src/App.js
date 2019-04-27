@@ -13,6 +13,8 @@ class App extends Component {
     let endNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
 
     flowchart = this.insertEmptyIfNode(flowchart, rootNodeID);
+    let ifNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
+    flowchart = this.insertEmptyIfNode(flowchart, ifNodeID, true);
 
     this.state = {
       flowchart: flowchart
@@ -85,7 +87,7 @@ class App extends Component {
   // [Child Node]
   insertEmptyIfNode = (flowchart, parentNodeID, branchTakenIsTrue = false) => {
 
-    // get what the child of the current parent 
+    // get what the child of the current parent
     let childNodeID = this.getChildNodeID(flowchart, parentNodeID, branchTakenIsTrue);
 
     // get nodeIDs for all the newly generated nodes
