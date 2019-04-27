@@ -13,6 +13,7 @@ class App extends Component {
     let endNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
 
     flowchart = this.insertEmptyIfNode(flowchart, rootNodeID, endNodeID);
+
     this.state = {
       flowchart: flowchart
     }
