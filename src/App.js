@@ -14,6 +14,7 @@ class App extends Component {
 
     flowchart = this.insertEmptyIfNode(flowchart, rootNodeID);
     let ifNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
+    flowchart = this.insertEmptyIfNode(flowchart, ifNodeID, false);
     flowchart = this.insertEmptyIfNode(flowchart, ifNodeID, true);
 
     this.state = {

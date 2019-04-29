@@ -179,7 +179,7 @@ class Flowchart extends Component {
       }
     }
 
-    // combine to get total width 
+    // combine to get total width
     return width + maxFalseWidth + maxTrueWidth;
   }
 
@@ -220,8 +220,57 @@ class Flowchart extends Component {
       }
     }
 
-    return height;
+    return height + 1;
   }
+
+
+  // Place Flowchart into Graph ------------------------------------------------
+
+
+  // builds a lookup table of what row/col each node will be in in the graph representation of the flowchart
+  getNodeLocations = (flowchart, sizes, nodeID, locations = {}, row = 0, col = 0) => {
+
+
+    // if we've already visited this node, bubble up
+    if (nodeID in locations) {
+      return locations;
+    }
+
+    // Record the location of this node
+    //alert(JSON.stringify(flowchart));
+    locations[nodeID] = {row: row, col: col};
+    let node = flowchart['flow'][nodeID];
+
+
+    // bubble up when we've reaced the end of the line
+    if (node['nodeType'] === "END") {
+      return locations;
+    }
+
+    // in an IF node, path branches to nextNodeID_IfTrue and nextNodeID_IfFalse
+    else if (node['nodeType'] === "IF") {
+
+      // 1) we want to jump to the end of the IF branch and continue (Depth First style)
+      let mergeNodeRow = row + sizes[nodeID]['height'];
+      locations = this.getNodeLocations(flowchart, sizes, node['mergeNodeID'], locations, mergeNodeRow, col);
+
+      // 2) we want to recursively fill the ifFalse branch that we skipped
+      locations = this.getNodeLocations(flowchart, sizes, node['nextNodeID_IfFalse'], locations, row + 1, col);
+
+      // 3) lastly, we want to recursively fill the ifTrue branch that was skipped
+      let ifTrueCol = col + sizes[nodeID]['width'];
+      locations = this.getNodeLocations(flowchart, sizes, node['nextNodeID_IfTrue'], locations, row, ifTrueCol);
+    }
+
+
+    // Otherwise, node will point to nextNodeID
+    else {
+      locations = this.getNodeLocations(flowchart, sizes, node['nextNodeID'], locations, row + 1, col);
+    }
+
+    return locations;
+  }
+
 
   // Helpful Functions ---------------------------------------------------------
 
@@ -268,12 +317,23 @@ class Flowchart extends Component {
 
     let dependencies = this.getAllBranchDependencies(flowchart);
     let sizes = this.getBranchSizes(flowchart, dependencies);
+    let locations = this.getNodeLocations(flowchart, sizes, flowchart['rootNodeID']);
+
+
+    let test = [];
+    for (let nodeID in locations) {
+      test.push(
+        <p>({locations[nodeID]['row']}, {locations[nodeID]['col']}) - {flowchart['flow'][nodeID]['nodeType']}</p>
+      );
+    }
 
     return (
       <div id="Flowchart">
         <p>{JSON.stringify(sizes)}</p>
         <p>-</p>
         <p>{JSON.stringify(dependencies)}</p>
+        <p>-</p>
+        {test}
       </div>
     );
   }
