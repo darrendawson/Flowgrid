@@ -237,7 +237,6 @@ class Flowchart extends Component {
     }
 
     // Record the location of this node
-    //alert(JSON.stringify(flowchart));
     locations[nodeID] = {row: row, col: col};
     let node = flowchart['flow'][nodeID];
 
@@ -309,31 +308,139 @@ class Flowchart extends Component {
   }
 
 
+  // Grid ----------------------------------------------------------------------
+
+  // creates an empty 2D array that can accomodate all the nodes inside of a flowchart
+  // - get maxRow and maxCol in nodeLocations to figure out how large it should be
+  // - array accessed by grid[row][col]
+  createEmptyGrid = (nodeLocations) => {
+
+    // get the dimensions of the grid
+    let maxRow = 0;
+    let maxCol = 0;
+    for (let nodeID in nodeLocations) {
+      maxRow = (nodeLocations[nodeID]['row'] > maxRow) ? nodeLocations[nodeID]['row'] : maxRow;
+      maxCol = (nodeLocations[nodeID]['col'] > maxCol) ? nodeLocations[nodeID]['col'] : maxCol;
+    }
+
+    // create the grid
+    let grid = [];
+    for (let i = 0; i <= maxRow; i++) {
+      let gridRow = [];
+      for (let j = 0; j <= maxCol; j++) {
+        gridRow.push(0);
+      }
+      grid.push(gridRow);
+    }
+
+    return grid;
+  }
+
+
+  // nodeLocations starts off as just nodes
+  // this function will create empty rows / columns between nodes that act as space for edges
+  addEdgeDistanceToNodeLocations = (nodeLocations) => {
+    for (let nodeID in nodeLocations) {
+      nodeLocations[nodeID]['row'] = nodeLocations[nodeID]['row'] * 2 + 1;
+      nodeLocations[nodeID]['col'] = nodeLocations[nodeID]['col'] * 2 + 1;
+    }
+    return nodeLocations;
+  }
+
+
+  // converts a flowchart into a grid
+  getFlowchartAsGrid = (flowchart) => {
+
+    // get (row, col) location pairs for each node in the flowchart
+    // -> calculates nested IfNode branch dependencies to make sure there aren't any collisions
+    let branchDependencies = this.getAllBranchDependencies(flowchart);
+    let branchSizes = this.getBranchSizes(flowchart, branchDependencies);
+    let nodeLocations = this.getNodeLocations(flowchart, branchSizes, flowchart['rootNodeID']);
+    nodeLocations = this.addEdgeDistanceToNodeLocations(nodeLocations);
+    let grid = this.createEmptyGrid(nodeLocations);
+
+    // Add nodes into the grid
+    for (let nodeID in nodeLocations) {
+      let nodeRow = nodeLocations[nodeID]['row'];
+      let nodeCol = nodeLocations[nodeID]['col'];
+
+      grid[nodeRow][nodeCol] = {"type": "node", "nodeID": nodeID};
+    }
+
+    // Add edges between nodes
+
+    // return the grid
+    return grid;
+  }
+
+
   // Render --------------------------------------------------------------------
 
-  render() {
-    let flowchart = this.props.flowchart;
-    let paths = this.getAllPossiblePaths(flowchart, flowchart['rootNodeID'], [], []);
 
-    let dependencies = this.getAllBranchDependencies(flowchart);
-    let sizes = this.getBranchSizes(flowchart, dependencies);
-    let locations = this.getNodeLocations(flowchart, sizes, flowchart['rootNodeID']);
+  renderNode = (flowchart, nodeID) => {
+    return (
+      <div className="grid_col">
+        <p>{flowchart['flow'][nodeID]['nodeType']}</p>
+      </div>
+    );
+  }
 
+  renderEdge = () => {
+    return (
+      <div>
 
-    let test = [];
-    for (let nodeID in locations) {
-      test.push(
-        <p>({locations[nodeID]['row']}, {locations[nodeID]['col']}) - {flowchart['flow'][nodeID]['nodeType']}</p>
+      </div>
+    );
+  }
+
+  renderFlowchart = (flowchart) => {
+
+    // convert flowchart into grid format
+    let nodeGrid = this.getFlowchartAsGrid(flowchart);
+    let gridToRender = [];
+
+    // render grid
+    for (let i = 0; i < nodeGrid.length; i++) {
+
+      let rowToRender = [];
+      let onlyEdgesInRow = true; // rows with only edges will be shorter
+
+      for (let j = 0; j < nodeGrid[i].length; j++) {
+
+        if (nodeGrid[i][j]['type'] === "node") {
+          onlyEdgesInRow = false;
+          rowToRender.push(this.renderNode(flowchart, nodeGrid[i][j]['nodeID']));
+        }
+
+        else if (nodeGrid[i][j]['type'] === "edge") {
+          rowToRender.push(this.renderEdge(nodeGrid[i][j]));
+        }
+
+        else {
+          // if there isn't a node or an edge, it'll just be an empty space
+          rowToRender.push(<div className="grid_col"></div>);
+        }
+      }
+
+      // add Row to grid
+      let rowCSS = (onlyEdgesInRow) ? "grid_row_no_nodes" : "grid_row";
+      gridToRender.push(
+        <div className={rowCSS}>
+          {rowToRender}
+        </div>
       );
     }
 
+    return gridToRender;
+  }
+
+  // renders the <Flowchart/>
+  render() {
+
     return (
-      <div id="Flowchart">
-        <p>{JSON.stringify(sizes)}</p>
-        <p>-</p>
-        <p>{JSON.stringify(dependencies)}</p>
-        <p>-</p>
-        {test}
+      <div id="FLOWCHART">
+
+        {this.renderFlowchart(this.props.flowchart)}
       </div>
     );
   }
