@@ -1,0 +1,145 @@
+#EDGE {
+  height: 100%;
+  width: 100%;
+}
+
+#create_button {
+  height: 36px;
+  width: 36px;
+  border-radius: 18px;
+  background-color: inherit;
+  border: 2px solid white;
+  color: white;
+  font-size: 0.7em;
+  padding: 0px;
+  margin: 0px;
+}
+
+#create_button:hover {
+  border-color: #15ea7f;
+  color: #15ea7f;
+}
+
+/* Vertical ------------------------------------------------------------------*/
+
+#EDGE .vertical {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#EDGE .vertical .line {
+  width: 2px;
+  flex-grow: 1;
+  background-color: white;
+}
+
+/* Horizontal ----------------------------------------------------------------*/
+
+
+#EDGE .horizontal {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#EDGE .horizontal .line {
+  height: 2px;
+  flex-grow: 1;
+  background-color: white;
+}
+
+/* Down Left -----------------------------------------------------------------*/
+
+#EDGE .down_left {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#EDGE .down_left .vertical_line {
+  width: 2px;
+  background-color: white;
+  flex-grow: 1;
+}
+
+#EDGE .down_left .vertical_empty_line {
+  width: 2px;
+  flex-grow: 1;
+}
+
+#EDGE .down_left .row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#EDGE .down_left .horizontal_line {
+  height: 2px;
+  flex-grow: 1;
+  background-color: white;
+}
+
+#EDGE .down_left .horizontal_empty_line {
+  height: 2px;
+  flex-grow: 1;
+}
+
+#EDGE .down_left .filling_line {
+  width: 2px;
+  height: 50%;
+  background-color: white;
+}
+
+/* Vertical Right ------------------------------------------------------------*/
+
+#EDGE .vertical_right {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#EDGE .vertical_right .vertical_line {
+  width: 2px;
+  flex-grow: 1;
+  background-color: white;
+}
+
+#EDGE .vertical_right .horizontal_empty_line {
+  height: 2px;
+  flex-grow: 1;
+}
+
+#EDGE .vertical_right .horizontal_line {
+  height: 2px;
+  flex-grow: 1;
+  background-color: white;
+}
+
+#EDGE .vertical_right .row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+#EDGE .vertical_right .filling_line {
+  background-color: white;
+  height: 100%;
+  width: 2px;
+}

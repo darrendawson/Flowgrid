@@ -23,6 +23,12 @@ class App extends Component {
   }
 
 
+  // Update State --------------------------------------------------------------
+
+  updateFlowchart = (newFlowchart) => {
+    this.setState({flowchart: newFlowchart});
+  }
+
   // Flowchart Functions -------------------------------------------------------
 
 
@@ -200,6 +206,9 @@ class App extends Component {
       <div className="App">
         <Flowchart
           flowchart={this.state.flowchart}
+          insertEmptyCommandNode={this.insertEmptyCommandNode}
+          insertEmptyIfNode={this.insertEmptyIfNode}
+          updateFlowchart={this.updateFlowchart}
         />
       </div>
     );

@@ -27,3 +27,11 @@
   text-align: center;
   width: 130px;
 }
+
+#FLOWCHART .grid_col_no_nodes {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 90px;
+}

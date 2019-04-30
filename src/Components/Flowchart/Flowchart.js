@@ -1,13 +1,51 @@
 import React, { Component } from 'react';
 import './Flowchart.css';
 
+import Edge from './Edge/Edge.js';
+
 class Flowchart extends Component {
 
   constructor() {
     super();
   }
 
+  // Insert Node Functionality -------------------------------------------------
 
+  // given parent and child node, insert node between them
+  // -> this function should check to see if the parentNode type is an ifNode
+  //  - If it is, then make sure it calls insertEmptyCommandNodeIntoFlowchart() with proper declarations
+  insertNewCommandNode = (parentNodeID, childNodeID) => {
+
+    let flowchart = this.props.flowchart;
+
+    // determine whether the parent node is an if statement
+    // and if it is, determine whether the child node is on the ifTrue or ifFalse path
+    let parentTookIfTrue = false;
+    if (flowchart['flow'][parentNodeID]['nodeType'] === "IF") {
+      parentTookIfTrue = (flowchart['flow'][parentNodeID]['nextNodeID_IfTrue'] === childNodeID);
+    }
+
+
+    flowchart = this.props.insertEmptyCommandNode(flowchart, parentNodeID, parentTookIfTrue);
+    this.props.updateFlowchart(flowchart);
+  }
+
+
+  // same as insertNewCommandNode, but for an IF node
+  insertNewIfNode = (parentNodeID, childNodeID) => {
+
+    let flowchart = this.props.flowchart;
+
+    // determine whether the parent node is an if statement
+    // and if it is, determine whether the child node is on the ifTrue or ifFalse path
+    let parentTookIfTrue = false;
+    if (flowchart['flow'][parentNodeID]['nodeType'] === "IF") {
+      parentTookIfTrue = (flowchart['flow'][parentNodeID]['nextNodeID_IfTrue'] === childNodeID);
+    }
+
+    flowchart = this.props.insertEmptyIfNode(flowchart, parentNodeID, parentTookIfTrue);
+    this.props.updateFlowchart(flowchart);
+  }
 
   // Branch Dependencies -------------------------------------------------------
   /*
@@ -614,38 +652,57 @@ class Flowchart extends Component {
 
   renderEdge = (edge) => {
     return (
-      <div className="grid_col">
-        <p>{edge['direction']}</p>
-      </div>
+      <Edge
+        direction={edge['direction']}
+        nodes={edge['nodes']}
+        insertNewCommandNode={this.insertNewCommandNode}
+        insertNewIfNode={this.insertNewIfNode}
+      />
     );
   }
 
+
+  // returns flowchart to render
   renderFlowchart = (flowchart) => {
 
     // convert flowchart into grid format
     let nodeGrid = this.getFlowchartAsGrid(flowchart);
     let gridToRender = [];
 
-    // render grid
+    // render grid by building up rows
     for (let i = 0; i < nodeGrid.length; i++) {
 
       let rowToRender = [];
       let onlyEdgesInRow = true; // rows with only edges will be shorter
 
+      // build up columns in the row
       for (let j = 0; j < nodeGrid[i].length; j++) {
 
+        // get Column type (even columns are edge only)
+        let colCSS = (j % 2 === 0) ? "grid_col_no_nodes" : "grid_col";
+
+        // render a node
         if (nodeGrid[i][j]['type'] === "node") {
           onlyEdgesInRow = false;
-          rowToRender.push(this.renderNode(flowchart, nodeGrid[i][j]['nodeID']));
+          rowToRender.push(
+            <div className={colCSS}>
+              {this.renderNode(flowchart, nodeGrid[i][j]['nodeID'])}
+            </div>
+          );
         }
 
+        // render edge
         else if (nodeGrid[i][j]['type'] === "edge") {
-          rowToRender.push(this.renderEdge(nodeGrid[i][j]));
+          rowToRender.push(
+            <div className={colCSS}>
+              {this.renderEdge(nodeGrid[i][j])}
+            </div>
+          );
         }
 
+        // if there isn't a node or an edge, it'll just be an empty space
         else {
-          // if there isn't a node or an edge, it'll just be an empty space
-          rowToRender.push(<div className="grid_col"></div>);
+          rowToRender.push(<div className={colCSS}></div>);
         }
       }
 
@@ -660,6 +717,8 @@ class Flowchart extends Component {
 
     return gridToRender;
   }
+
+
 
   // renders the <Flowchart/>
   render() {
