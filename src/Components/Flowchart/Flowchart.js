@@ -368,11 +368,238 @@ class Flowchart extends Component {
     }
 
     // Add edges between nodes
+    for (let nodeID in nodeLocations) {
+
+      let node = flowchart['flow'][nodeID];
+
+      // add edges
+      if (node['nodeType'] === "END") {
+        // don't draw any edges coming out of the END type node
+      } else if (node['nodeType'] === "IF") {
+        // add edges for both branches of if statement
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfFalse']);
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfTrue']);
+      } else {
+        // otherwise, node doesn't need only points to one more node
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
+      }
+    }
 
     // return the grid
     return grid;
   }
 
+
+  // Edges ---------------------------------------------------------------------
+  /*
+    - functions specifically for inserting / manipulating edges
+  */
+
+
+  // given [Node A] and [Node B], draws connecting edges between them
+  insertEdgesForNodePairIntoGrid = (grid, nodeLocationLookup, nodeA_ID, nodeB_ID) => {
+
+    let nodeA_Row = nodeLocationLookup[nodeA_ID]['row'];
+    let nodeA_Column = nodeLocationLookup[nodeA_ID]['col'];
+    let nodeB_Row = nodeLocationLookup[nodeB_ID]['row'];
+    let nodeB_Column = nodeLocationLookup[nodeB_ID]['col'];
+
+    // for storing values to pass to this.combineTwoEdges()
+    let newEdge;
+    let currentEdge;
+
+    if (nodeB_Row > nodeA_Row && nodeB_Column === nodeA_Column) {
+      /*
+        Case:
+            [Node A]
+                |
+                V
+            [Node B]
+      */
+
+      for (let i = nodeA_Row + 1; i < nodeB_Row; i++) {
+        newEdge = {"type": "edge", "direction": "vertical", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+        currentEdge = grid[i][nodeA_Column];
+        grid[i][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
+      }
+
+
+    } else if (nodeA_Row === nodeB_Row && nodeA_Column < nodeB_Column) {
+      /*
+        Case:
+          [Node A] -> [Node B]
+      */
+      for (let i = nodeA_Column + 1; i < nodeB_Column; i++) {
+        newEdge = {"type": "edge", "direction": "horizontal", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+        currentEdge = grid[nodeA_Row][i];
+        grid[nodeA_Row][i] = this.combineTwoEdges(newEdge, currentEdge);
+      }
+
+    } else if (nodeA_Row < nodeB_Row && nodeA_Column > nodeB_Column) {
+      /*
+        Case:
+               |         [Node A]
+               |            |
+               | -----------.
+               |
+            [Node B]
+      */
+
+      // add edge directly under NodeA that
+      for (let i = nodeA_Row + 1; i < nodeB_Row - 1; i++) {
+        newEdge = {"type": "edge", "direction": "vertical", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+        currentEdge = grid[i][nodeA_Column];
+        grid[i][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
+      }
+
+
+      // add up_left
+      newEdge = {"type": "edge", "direction": "up_left", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+      currentEdge = grid[nodeB_Row-1][nodeA_Column];
+      grid[nodeB_Row-1][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
+
+      // add horizontal edges
+      for (let i = nodeB_Column + 1; i < nodeA_Column; i++) {
+        newEdge = {"type": "edge", "direction": "horizontal", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+        currentEdge = grid[nodeA_Row + 1][i];
+        grid[nodeB_Row - 1][i] = this.combineTwoEdges(newEdge, currentEdge);
+      }
+
+      // Add edge to connect to edge above Node B
+      newEdge = {"type": "edge", "direction": "down_right", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+      currentEdge = grid[nodeB_Row - 1][nodeB_Column];
+      grid[nodeB_Row - 1][nodeB_Column] = this.combineTwoEdges(newEdge, currentEdge);
+    }
+    return grid;
+  }
+
+
+  // takes in 2 edges and returns there sum:
+  // ex: vertical edge + horizontal edge = vertical_horizontal (a plus)
+  combineTwoEdges = (edge1, edge2) => {
+
+    // only add edges together if there are edges to add!
+    if (edge1 === 0 || edge1['type'] !== "edge") {
+      return edge2;
+    } else if (edge2 === 0 || edge2['type'] !== "edge") {
+      return edge1;
+    }
+
+
+    // combine list of node directions
+    let nodes = [];
+    for (let i = 0; i < edge1['nodes'].length; i++) {
+      nodes.push(edge1['nodes'][i]);
+    }
+
+    for (let i = 0; i < edge2['nodes'].length; i++) {
+      nodes.push(edge2['nodes'][i]);
+    }
+
+    // if edges are the same or can't be combined, then return them
+    if (edge1['direction'] === edge2['direction']) {
+      edge1['nodes'] = nodes;
+      return edge1;
+    } else if (edge1['direction'] === "vertical_horizontal") {
+      edge1['nodes'] = nodes;
+      return edge1;
+    } else if (edge2['direction'] === "vertical_horizontal") {
+      edge2['nodes'] = nodes;
+      return edge2;
+    }
+
+
+    // get edgeTypes to compare
+    let edgeTypes = [edge1['direction'], edge2['direction']];
+
+    /*
+      3/4 lines like this:
+      -------------
+      |     |     |
+      |     |     |
+      |     |-----|
+      |     |     |
+      |     |     |
+      -------------
+      (this is vertical_right)
+      naming scheme involves vertical component first and horizontal second
+      "horizontal" is having both left and right lines active (vertical follows the same principle)
+    */
+    if (
+      (edgeTypes.includes('vertical') && edgeTypes.includes('up_right'))       ||
+      (edgeTypes.includes('vertical') && edgeTypes.includes('down_right'))     ||
+      (edgeTypes.includes('up_right') && edgeTypes.includes('down_right'))     ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('up_right')) ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('down_right'))
+    ) {
+      return {"type": "edge", "direction": "vertical_right", "nodes": nodes};
+    }
+
+    else if (
+      (edgeTypes.includes('horizontal') && edgeTypes.includes('up_left'))    ||
+      (edgeTypes.includes('horizontal') && edgeTypes.includes('up_right'))   ||
+      (edgeTypes.includes('up_left') && edgeTypes.includes('up_right'))      ||
+      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('up_left')) ||
+      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('up_right'))
+    ) {
+      return {"type": "edge", "direction": "up_horizontal", "nodes": nodes};
+    }
+
+    else if (
+      (edgeTypes.includes('vertical') && edgeTypes.includes('up_left'))        ||
+      (edgeTypes.includes('vertical') && edgeTypes.includes('down_left'))      ||
+      (edgeTypes.includes('up_left') && edgeTypes.includes('down_left'))       ||
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('up_left'))   ||
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('down_left'))
+    ) {
+      return {"type": "edge", "direction": "vertical_left", "nodes": nodes};
+    }
+
+    else if (
+      (edgeTypes.includes('horizontal') && edgeTypes.includes('down_left'))       ||
+      (edgeTypes.includes('horizontal') && edgeTypes.includes('down_right'))      ||
+      (edgeTypes.includes('down_left') && edgeTypes.includes('down_right'))       ||
+      (edgeTypes.includes('down_horizontal') && edgeTypes.includes('down_left'))  ||
+      (edgeTypes.includes('down_horizontal') && edgeTypes.includes('down_right'))
+    ) {
+      return {"type": "edge", "direction": "down_horizontal", "nodes": nodes};
+    }
+
+
+    /*
+      4/4 Lines - this is for when edges add up to be a big +
+    */
+    else if (
+      (edgeTypes.includes('vertical') && edgeTypes.includes('horizontal')) ||
+
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('down_left')) ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('up_left')) ||
+
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('up_horizontal')) ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('down_horizontal')) ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('vertical_left')) ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('horizontal')) ||
+
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('up_right')) ||
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('down_right')) ||
+
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('up_horizontal')) ||
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('down_horizontal')) ||
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('horizontal')) ||
+
+      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('down_left')) ||
+      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('down_right')) ||
+
+      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('vertical')) ||
+      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('down_horizontal')) ||
+
+      (edgeTypes.includes('down_horizontal') && edgeTypes.includes('up_left')) ||
+      (edgeTypes.includes('down_horizontal') && edgeTypes.includes('up_right')) ||
+      (edgeTypes.includes('down_horizontal') && edgeTypes.includes('vertical'))
+    ) {
+      return {"type": "edge", "direction": "vertical_horizontal", "nodes": nodes};
+    }
+  }
 
   // Render --------------------------------------------------------------------
 
@@ -385,10 +612,10 @@ class Flowchart extends Component {
     );
   }
 
-  renderEdge = () => {
+  renderEdge = (edge) => {
     return (
-      <div>
-
+      <div className="grid_col">
+        <p>{edge['direction']}</p>
       </div>
     );
   }
