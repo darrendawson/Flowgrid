@@ -203,8 +203,8 @@ class Flowchart extends Component {
     let maxFalseWidth = 0;
     for (let i = 0; i < falseBranch.length; i++) {
       let branchID = falseBranch[i];
-      if (sizes[branchID]['width'] > maxFalseWidth) {
-        maxFalseWidth = sizes[branchID]['width'];
+      if (sizes[branchID]['width']['widthTotal'] > maxFalseWidth) {
+        maxFalseWidth = sizes[branchID]['width']['widthTotal'];
       }
     }
 
@@ -212,13 +212,17 @@ class Flowchart extends Component {
     let maxTrueWidth = 0;
     for (let i = 0; i < trueBranch.length; i++) {
       let branchID = trueBranch[i];
-      if (sizes[branchID]['width'] > maxTrueWidth) {
-        maxTrueWidth = sizes[branchID]['width'];
+      if (sizes[branchID]['width']['widthTotal'] > maxTrueWidth) {
+        maxTrueWidth = sizes[branchID]['width']['widthTotal'];
       }
     }
 
     // combine to get total width
-    return width + maxFalseWidth + maxTrueWidth;
+    return {
+      'widthIfFalse': maxFalseWidth,
+      'widthIfTrue': maxTrueWidth,
+      'widthTotal': maxFalseWidth + maxTrueWidth + 1
+    };
   }
 
   // calls calculateHeightOfABranch() for ifFalse and ifTrue branches of IF node
@@ -295,7 +299,7 @@ class Flowchart extends Component {
       locations = this.getNodeLocations(flowchart, sizes, node['nextNodeID_IfFalse'], locations, row + 1, col);
 
       // 3) lastly, we want to recursively fill the ifTrue branch that was skipped
-      let ifTrueCol = col + sizes[nodeID]['width'];
+      let ifTrueCol = col + sizes[nodeID]['width']['widthIfFalse'] + 1;
       locations = this.getNodeLocations(flowchart, sizes, node['nextNodeID_IfTrue'], locations, row, ifTrueCol);
     }
 
@@ -405,6 +409,7 @@ class Flowchart extends Component {
       grid[nodeRow][nodeCol] = {"type": "node", "nodeID": nodeID};
     }
 
+
     // Add edges between nodes
     for (let nodeID in nodeLocations) {
 
@@ -417,9 +422,11 @@ class Flowchart extends Component {
         // add edges for both branches of if statement
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfFalse']);
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfTrue']);
+
       } else {
         // otherwise, node doesn't need only points to one more node
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
+
       }
     }
 
@@ -490,7 +497,6 @@ class Flowchart extends Component {
         grid[i][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
       }
 
-
       // add up_left
       newEdge = {"type": "edge", "direction": "up_left", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
       currentEdge = grid[nodeB_Row-1][nodeA_Column];
@@ -508,6 +514,7 @@ class Flowchart extends Component {
       currentEdge = grid[nodeB_Row - 1][nodeB_Column];
       grid[nodeB_Row - 1][nodeB_Column] = this.combineTwoEdges(newEdge, currentEdge);
     }
+
     return grid;
   }
 
@@ -564,11 +571,12 @@ class Flowchart extends Component {
       "horizontal" is having both left and right lines active (vertical follows the same principle)
     */
     if (
-      (edgeTypes.includes('vertical') && edgeTypes.includes('up_right'))       ||
-      (edgeTypes.includes('vertical') && edgeTypes.includes('down_right'))     ||
-      (edgeTypes.includes('up_right') && edgeTypes.includes('down_right'))     ||
-      (edgeTypes.includes('vertical_right') && edgeTypes.includes('up_right')) ||
-      (edgeTypes.includes('vertical_right') && edgeTypes.includes('down_right'))
+      (edgeTypes.includes('vertical') && edgeTypes.includes('up_right'))         ||
+      (edgeTypes.includes('vertical') && edgeTypes.includes('down_right'))       ||
+      (edgeTypes.includes('up_right') && edgeTypes.includes('down_right'))       ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('up_right'))   ||
+      (edgeTypes.includes('vertical_right') && edgeTypes.includes('down_right')) ||
+      (edgeTypes.includes('vertical') && edgeTypes.includes('vertical_right'))
     ) {
       return {"type": "edge", "direction": "vertical_right", "nodes": nodes};
     }
@@ -578,7 +586,8 @@ class Flowchart extends Component {
       (edgeTypes.includes('horizontal') && edgeTypes.includes('up_right'))   ||
       (edgeTypes.includes('up_left') && edgeTypes.includes('up_right'))      ||
       (edgeTypes.includes('up_horizontal') && edgeTypes.includes('up_left')) ||
-      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('up_right'))
+      (edgeTypes.includes('up_horizontal') && edgeTypes.includes('up_right'))||
+      (edgeTypes.includes('horizontal') && edgeTypes.includes('up_horizontal'))
     ) {
       return {"type": "edge", "direction": "up_horizontal", "nodes": nodes};
     }
@@ -588,7 +597,8 @@ class Flowchart extends Component {
       (edgeTypes.includes('vertical') && edgeTypes.includes('down_left'))      ||
       (edgeTypes.includes('up_left') && edgeTypes.includes('down_left'))       ||
       (edgeTypes.includes('vertical_left') && edgeTypes.includes('up_left'))   ||
-      (edgeTypes.includes('vertical_left') && edgeTypes.includes('down_left'))
+      (edgeTypes.includes('vertical_left') && edgeTypes.includes('down_left')) ||
+      (edgeTypes.includes('vertical') && edgeTypes.includes('vertical_left'))
     ) {
       return {"type": "edge", "direction": "vertical_left", "nodes": nodes};
     }
@@ -598,7 +608,8 @@ class Flowchart extends Component {
       (edgeTypes.includes('horizontal') && edgeTypes.includes('down_right'))      ||
       (edgeTypes.includes('down_left') && edgeTypes.includes('down_right'))       ||
       (edgeTypes.includes('down_horizontal') && edgeTypes.includes('down_left'))  ||
-      (edgeTypes.includes('down_horizontal') && edgeTypes.includes('down_right'))
+      (edgeTypes.includes('down_horizontal') && edgeTypes.includes('down_right')) ||
+      (edgeTypes.includes('down') && edgeTypes.includes('down_horizontal'))
     ) {
       return {"type": "edge", "direction": "down_horizontal", "nodes": nodes};
     }
@@ -637,6 +648,7 @@ class Flowchart extends Component {
     ) {
       return {"type": "edge", "direction": "vertical_horizontal", "nodes": nodes};
     }
+
   }
 
   // Render --------------------------------------------------------------------
@@ -725,7 +737,6 @@ class Flowchart extends Component {
 
     return (
       <div id="FLOWCHART">
-
         {this.renderFlowchart(this.props.flowchart)}
       </div>
     );
