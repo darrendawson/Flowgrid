@@ -186,7 +186,7 @@ class App extends Component {
 
     while (true) {
       let newID = "";
-      for (let i = 0; i < 15; i++) {
+      for (let i = 0; i < 5; i++) {
         newID += possible.charAt(Math.floor(Math.random() * possible.length));
       }
 

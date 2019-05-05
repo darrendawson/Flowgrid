@@ -316,7 +316,7 @@ class Flowchart extends Component {
   // Helpful Functions ---------------------------------------------------------
 
   // returns a list of all possible node paths through a flowchart
-  getAllPossiblePaths = (flowchart, nodeID, completePaths, pathInProgress) => {
+  getAllPossiblePaths = (flowchart, nodeID, completePaths = [], pathInProgress = []) => {
 
     let node = flowchart['flow'][nodeID];
 
@@ -401,13 +401,6 @@ class Flowchart extends Component {
     nodeLocations = this.addEdgeDistanceToNodeLocations(nodeLocations);
     let grid = this.createEmptyGrid(nodeLocations);
 
-    // Add nodes into the grid
-    for (let nodeID in nodeLocations) {
-      let nodeRow = nodeLocations[nodeID]['row'];
-      let nodeCol = nodeLocations[nodeID]['col'];
-
-      grid[nodeRow][nodeCol] = {"type": "node", "nodeID": nodeID};
-    }
 
 
     // Add edges between nodes
@@ -424,11 +417,19 @@ class Flowchart extends Component {
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfTrue']);
 
       } else {
-        // otherwise, node doesn't need only points to one more node
+        // otherwise, node only points to one more node
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
-
       }
     }
+
+
+    // Add nodes into the grid
+    for (let nodeID in nodeLocations) {
+      let nodeRow = nodeLocations[nodeID]['row'];
+      let nodeCol = nodeLocations[nodeID]['col'];
+      grid[nodeRow][nodeCol] = {"type": "node", "nodeID": nodeID};
+    }
+
 
     // return the grid
     return grid;
@@ -490,6 +491,7 @@ class Flowchart extends Component {
             [Node B]
       */
 
+
       // add edge directly under NodeA that
       for (let i = nodeA_Row + 1; i < nodeB_Row - 1; i++) {
         newEdge = {"type": "edge", "direction": "vertical", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
@@ -498,14 +500,15 @@ class Flowchart extends Component {
       }
 
       // add up_left
-      newEdge = {"type": "edge", "direction": "up_left", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
-      currentEdge = grid[nodeB_Row-1][nodeA_Column];
-      grid[nodeB_Row-1][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
+      newEdge = {"type": "edge", "direction": "up_left", "nodes": [{"parentNodeID": nodeA_ID + '_WTF', "childNodeID": nodeB_ID}]};
+      currentEdge = grid[nodeB_Row - 1][nodeA_Column];
+      grid[nodeB_Row - 1][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
+
 
       // add horizontal edges
       for (let i = nodeB_Column + 1; i < nodeA_Column; i++) {
         newEdge = {"type": "edge", "direction": "horizontal", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
-        currentEdge = grid[nodeA_Row + 1][i];
+        currentEdge = grid[nodeB_Row + 1][i];
         grid[nodeB_Row - 1][i] = this.combineTwoEdges(newEdge, currentEdge);
       }
 
@@ -646,6 +649,7 @@ class Flowchart extends Component {
       (edgeTypes.includes('down_horizontal') && edgeTypes.includes('up_right')) ||
       (edgeTypes.includes('down_horizontal') && edgeTypes.includes('vertical'))
     ) {
+
       return {"type": "edge", "direction": "vertical_horizontal", "nodes": nodes};
     }
 

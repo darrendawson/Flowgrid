@@ -199,6 +199,7 @@ class Edge extends Component {
   }
 
 
+
   render() {
     return (
       <div id="EDGE"
