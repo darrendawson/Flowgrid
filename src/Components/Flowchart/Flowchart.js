@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import './Flowchart.css';
 
 import Edge from './Edge/Edge.js';
+import Node from './Node/Node.js';
+
 
 class Flowchart extends Component {
 
@@ -658,14 +660,22 @@ class Flowchart extends Component {
   // Render --------------------------------------------------------------------
 
 
+  // renders a <Node/>
   renderNode = (flowchart, nodeID) => {
+
+    let node = flowchart['flow'][nodeID];
+    let nodeDetails = flowchart['nodes'][nodeID];
+
     return (
-      <div className="grid_col">
-        <p>{flowchart['flow'][nodeID]['nodeType']}</p>
-      </div>
+      <Node
+        nodeID={nodeID}
+        nodeType={node['nodeType']}
+        nodeDescription={nodeDetails['description']}
+      />
     );
   }
 
+  // renders an <Edge/>
   renderEdge = (edge) => {
     return (
       <Edge

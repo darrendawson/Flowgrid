@@ -36,6 +36,7 @@ class App extends Component {
   createEmptyFlowchart = () => {
     let flowchart = {};
     flowchart['flow'] = {};
+    flowchart['nodes'] = {};
 
     // get unique IDs for the starting and ending nodes
     let startNodeID = this.getNewNodeID(flowchart);
@@ -44,11 +45,15 @@ class App extends Component {
 
     // add startNode
     let startNode = {nodeID: startNodeID, nodeType: "START", nextNodeID: endNodeID};
+    let startNodeDetails = {nodeID: startNodeID, description: 'Start!'};
     flowchart['flow'][startNodeID] = startNode;
+    flowchart['nodes'][startNodeID] = startNodeDetails;
 
     // add endNode
     let endNode = {nodeID: endNodeID, nodeType: "END", nextNodeID: 0};
+    let endNodeDetails = {nodeID: endNodeID, description: 'End!'};
     flowchart['flow'][endNodeID] = endNode;
+    flowchart['nodes'][endNodeID] = endNodeDetails;
 
     // add root to flowchart so we know where to start
     flowchart['rootNodeID'] = startNodeID;
@@ -69,7 +74,9 @@ class App extends Component {
     let childNodeID = this.getChildNodeID(flowchart, parentNodeID, branchTakenIsTrue);
     let newNodeID = this.getNewNodeID(flowchart);
     let newNode = {nodeID: newNodeID, nodeType: "COMMAND", nextNodeID: childNodeID};
+    let newNodeDetails = {nodeID: newNodeID, description: '...'};
     flowchart['flow'][newNodeID] = newNode;
+    flowchart['nodes'][newNodeID] = newNodeDetails;
 
     // rewrite parent so it'll point at the new node instead of the child node
     flowchart = this.redirectParentNode(flowchart, parentNodeID, newNodeID, branchTakenIsTrue);
@@ -119,6 +126,7 @@ class App extends Component {
       nextNodeID_IfFalse: ifFalseNodeID,
       mergeNodeID: mergeNodeID
     };
+    flowchart['nodes'][ifNodeID] = {nodeID: ifNodeID, description: '...'};
 
     // create the ifTrue and ifFalse command Nodes and add them to flowchart
     flowchart['flow'][ifFalseNodeID] = {
@@ -126,12 +134,14 @@ class App extends Component {
       nodeType: "COMMAND",
       nextNodeID: mergeNodeID
     };
+    flowchart['nodes'][ifFalseNodeID] = {nodeID: ifFalseNodeID, description: '...'};
 
     flowchart['flow'][ifTrueNodeID] = {
       nodeID: ifTrueNodeID,
       nodeType: "COMMAND",
       nextNodeID: mergeNodeID
     }
+    flowchart['nodes'][ifTrueNodeID] = {nodeID: ifTrueNodeID, description: '...'};
 
     // add the mergeNode to the flowchart
     flowchart['flow'][mergeNodeID] = {
@@ -139,6 +149,7 @@ class App extends Component {
       nodeType: "MERGE",
       nextNodeID: childNodeID
     };
+    flowchart['nodes'][mergeNodeID] = {nodeID: mergeNodeID, description: '...'};
 
     return flowchart;
   }
