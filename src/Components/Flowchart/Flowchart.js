@@ -418,6 +418,12 @@ class Flowchart extends Component {
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfFalse']);
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfTrue']);
 
+      } else if (node['nodeType'] === "LOOP_COND") {
+        // loop conditional nodes are like IF statements, except the "ifTrue" points at a previous node in the flowchart
+        // ifTrue (loop back up) is stored as 'loopHeadNodeID'
+        // ifFalse (break from loop) is stored as 'nextNodeID'
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['loopHeadNodeID']);
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
       } else {
         // otherwise, node only points to one more node
         grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
@@ -502,7 +508,7 @@ class Flowchart extends Component {
       }
 
       // add up_left
-      newEdge = {"type": "edge", "direction": "up_left", "nodes": [{"parentNodeID": nodeA_ID + '_WTF', "childNodeID": nodeB_ID}]};
+      newEdge = {"type": "edge", "direction": "up_left", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
       currentEdge = grid[nodeB_Row - 1][nodeA_Column];
       grid[nodeB_Row - 1][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
 
@@ -518,6 +524,33 @@ class Flowchart extends Component {
       newEdge = {"type": "edge", "direction": "down_right", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
       currentEdge = grid[nodeB_Row - 1][nodeB_Column];
       grid[nodeB_Row - 1][nodeB_Column] = this.combineTwoEdges(newEdge, currentEdge);
+
+
+    } else if (nodeA_Row > nodeB_Row && nodeA_Column === nodeB_Column) {
+      /*
+        Case (loop):
+            --[Node B]
+            |    .
+            |    .
+            --[Node A]
+      */
+
+      // add edge directly to left of nodeA
+      newEdge = {"type": "edge", "direction": "up_right", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+      currentEdge = grid[nodeA_Row][nodeA_Column - 1];
+      grid[nodeA_Row][nodeA_Column - 1] = this.combineTwoEdges(newEdge, currentEdge);
+
+      // add edge directly to left of nodeB
+      newEdge = {"type": "edge", "direction": "down_right", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+      currentEdge = grid[nodeB_Row][nodeB_Column - 1];
+      grid[nodeB_Row][nodeB_Column - 1] = this.combineTwoEdges(newEdge, currentEdge);
+
+      // add vertical edges between nodeA and nodeB
+      for (let i = nodeB_Row + 1; i < nodeA_Row; i++) {
+        newEdge = {"type": "edge", "direction": "vertical", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID}]};
+        currentEdge = grid[i][nodeA_Column - 1];
+        grid[i][nodeA_Column - 1] = this.combineTwoEdges(newEdge, currentEdge);
+      }
     }
 
     return grid;

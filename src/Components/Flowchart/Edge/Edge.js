@@ -53,16 +53,16 @@ class Edge extends Component {
   renderVertical = () => {
     if (this.state.mouseHoverActive) {
       return (
-        <div className="vertical">
-          <div className="line"></div>
+        <div className="edge_container">
+          <div className="vertical_line"></div>
           {this.renderCreateButton()}
-          <div className="line"></div>
+          <div className="vertical_line"></div>
         </div>
       );
     } else {
       return (
-        <div className="vertical">
-          <div className="line"></div>
+        <div className="edge_container">
+          <div className="vertical_line"></div>
         </div>
       );
     }
@@ -72,16 +72,20 @@ class Edge extends Component {
   renderHorizontal = () => {
     if (this.state.mouseHoverActive) {
       return (
-        <div className="horizontal">
-          <div className="line"></div>
-          {this.renderCreateButton()}
-          <div className="line"></div>
+        <div className="edge_container">
+          <div className="row">
+            <div className="horizontal_line"></div>
+            {this.renderCreateButton()}
+            <div className="horizontal_line"></div>
+          </div>
         </div>
       );
     } else {
       return (
-        <div className="horizontal">
-          <div className="line"></div>
+        <div className="edge_container">
+          <div className="row">
+            <div className="horizontal_line"></div>
+          </div>
         </div>
       );
     }
@@ -91,26 +95,26 @@ class Edge extends Component {
   renderUpLeft = () => {
     if (this.state.mouseHoverActive) {
       return (
-        <div className="down_left">
+        <div className="edge_container">
           <div className="vertical_line"></div>
           <div className="row">
             <div className="horizontal_line"></div>
             {this.renderCreateButton()}
-            <div className="horizontal_empty_line"></div>
+            <div className="empty_horizontal_line"></div>
           </div>
-          <div className="vertical_empty_line"></div>
+          <div className="empty_vertical_line"></div>
         </div>
       );
     } else {
       return (
-        <div className="down_left">
+        <div className="edge_container">
           <div className="vertical_line"></div>
           <div className="row">
             <div className="horizontal_line"></div>
             <div className="filling_line"></div>
-            <div className="horizontal_empty_line"></div>
+            <div className="empty_horizontal_line"></div>
           </div>
-          <div className="vertical_empty_line"></div>
+          <div className="empty_vertical_line"></div>
         </div>
       );
     }
@@ -120,10 +124,10 @@ class Edge extends Component {
   renderVerticalRight = () => {
     if (this.state.mouseHoverActive) {
       return (
-        <div className="vertical_right">
+        <div className="edge_container">
           <div className="vertical_line"></div>
           <div className="row">
-            <div className="horizontal_empty_line"></div>
+            <div className="empty_horizontal_line"></div>
             {this.renderCreateButton()}
             <div className="horizontal_line"></div>
           </div>
@@ -132,11 +136,10 @@ class Edge extends Component {
       );
     } else {
       return (
-        <div className="vertical_right">
+        <div className="edge_container">
           <div className="vertical_line"></div>
           <div className="row">
-            <div className="horizontal_empty_line"></div>
-            <div className="filling_line"></div>
+            <div className="empty_horizontal_line"></div>
             <div className="horizontal_line"></div>
           </div>
           <div className="vertical_line"></div>
@@ -144,6 +147,63 @@ class Edge extends Component {
       );
     }
   }
+
+
+  renderDownHorizontal = () => {
+    if (this.state.mouseHoverActive) {
+      return (
+        <div className="edge_container">
+          <div className="empty_vertical_line"></div>
+          <div className="row">
+            <div className="horizontal_line"></div>
+            {this.renderCreateButton()}
+            <div className="horizontal_line"></div>
+          </div>
+          <div className="vertical_line"></div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="edge_container">
+          <div className="empty_vertical_line"></div>
+          <div className="row">
+            <div className="horizontal_line"></div>
+            <div className="horizontal_line"></div>
+          </div>
+          <div className="vertical_line"></div>
+        </div>
+      );
+    }
+  }
+
+
+  renderUpRight = () => {
+    if (this.state.mouseHoverActive) {
+      return (
+        <div className="edge_container">
+          <div className="vertical_line"></div>
+          <div className="row">
+            <div className="empty_horizontal_line"></div>
+            {this.renderCreateButton()}
+            <div className="horizontal_line"></div>
+          </div>
+          <div className="empty_vertical_line"></div>
+        </div>
+      );
+    } else {
+      return (
+        <div className="edge_container">
+          <div className="vertical_line"></div>
+          <div className="row">
+            <div className="empty_horizontal_line"></div>
+            <div className="horizontal_line"></div>
+          </div>
+          <div className="empty_vertical_line"></div>
+        </div>
+      );
+    }
+  }
+
 
   // edge has 2 options for rendering:
   // 1) User has not clicked the createNewNode button
@@ -187,6 +247,12 @@ class Edge extends Component {
 
       } else if (this.props.direction === "vertical_right") {
         return this.renderVerticalRight();
+
+      } else if (this.props.direction === "down_horizontal") {
+        return this.renderDownHorizontal();
+
+      } else if (this.props.direction === "up_right") {
+        return this.renderUpRight();
 
       } else {
         return (

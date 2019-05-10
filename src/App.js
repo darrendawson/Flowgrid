@@ -12,10 +12,11 @@ class App extends Component {
     let rootNodeID = flowchart['rootNodeID'];
     let endNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
 
-    flowchart = this.insertEmptyIfNode(flowchart, rootNodeID);
-    let ifNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
-    flowchart = this.insertEmptyIfNode(flowchart, ifNodeID, false);
-    flowchart = this.insertEmptyIfNode(flowchart, ifNodeID, true);
+    flowchart = this.insertEmptyLoopNode(flowchart, rootNodeID);
+    //flowchart = this.insertEmptyIfNode(flowchart, rootNodeID);
+    //let ifNodeID = flowchart['flow'][rootNodeID]['nextNodeID'];
+    //flowchart = this.insertEmptyIfNode(flowchart, ifNodeID, false);
+    //flowchart = this.insertEmptyIfNode(flowchart, ifNodeID, true);
 
     this.state = {
       flowchart: flowchart
@@ -101,7 +102,7 @@ class App extends Component {
   // [Child Node]
   insertEmptyIfNode = (flowchart, parentNodeID, branchTakenIsTrue = false) => {
 
-    // get what the child of the current parent
+    // get what the child of the current parent is
     let childNodeID = this.getChildNodeID(flowchart, parentNodeID, branchTakenIsTrue);
 
     // get nodeIDs for all the newly generated nodes
@@ -153,6 +154,75 @@ class App extends Component {
 
     return flowchart;
   }
+
+
+  // Inserts a loop into the flowchart (like a do-while with an initial IF guard)
+  // [parent Node]
+  //    |
+  // [If Node] ------------- [Loop Header]
+  //    |             |          |
+  //    |             |          |
+  //    |             |          |
+  //    |             ------ [Loop Condition]
+  //    |                        |
+  //    |------------------------
+  // [Merge Node]
+  //    |
+  // [Child Node]
+  insertEmptyLoopNode = (flowchart, parentNodeID, branchTakenIsTrue = false) => {
+
+    // get child of the parent
+    let childNodeID = this.getChildNodeID(flowchart, parentNodeID, branchTakenIsTrue);
+
+    // get nodeIDs for all the new nodes we are going to add
+    let ifNodeID = this.getNewNodeID(flowchart);
+    flowchart['flow'][ifNodeID] = 1;
+    let mergeNodeID = this.getNewNodeID(flowchart);
+    flowchart['flow'][mergeNodeID] = 1;
+    let loopHeaderNodeID = this.getNewNodeID(flowchart);
+    flowchart['flow'][loopHeaderNodeID] = 1;
+    let loopCondNodeID = this.getNewNodeID(flowchart);
+
+    // rewrite parentNode so it points at the new IfNode
+    flowchart = this.redirectParentNode(flowchart, parentNodeID, ifNodeID, branchTakenIsTrue);
+
+    // create new IF node and add it to flowchart
+    flowchart['flow'][ifNodeID] = {
+      nodeID: ifNodeID,
+      nodeType: "IF",
+      nextNodeID_IfTrue: loopHeaderNodeID,
+      nextNodeID_IfFalse: mergeNodeID,
+      mergeNodeID: mergeNodeID
+    };
+    flowchart['nodes'][ifNodeID] = {nodeID: ifNodeID, description: '...'};
+
+    // add loop nodes
+    flowchart['flow'][loopHeaderNodeID] = {
+      nodeID: loopHeaderNodeID,
+      nodeType: "LOOP_HEAD",
+      nextNodeID: loopCondNodeID
+    };
+    flowchart['nodes'][loopHeaderNodeID] = {nodeID: loopHeaderNodeID, description: '...'};
+
+    flowchart['flow'][loopCondNodeID] = {
+      nodeID: loopCondNodeID,
+      nodeType: "LOOP_COND",
+      nextNodeID: mergeNodeID,
+      loopHeadNodeID: loopHeaderNodeID
+    }
+    flowchart['nodes'][loopCondNodeID] = {nodeID: loopCondNodeID, description: '...'};
+
+    // add Merge node
+    flowchart['flow'][mergeNodeID] = {
+      nodeID: mergeNodeID,
+      nodeType: "MERGE",
+      nextNodeID: childNodeID
+    };
+    flowchart['nodes'][mergeNodeID] = {nodeID: mergeNodeID, description: '...'};
+
+    return flowchart;
+  }
+
 
 
 
