@@ -73,6 +73,8 @@ class App extends Component {
 
     // add node to flowchart and have it point at child
     let childNodeID = this.getChildNodeID(flowchart, parentNodeID, branchTakenIsTrue);
+
+
     let newNodeID = this.getNewNodeID(flowchart);
     let newNode = {nodeID: newNodeID, nodeType: "COMMAND", nextNodeID: childNodeID};
     let newNodeDetails = {nodeID: newNodeID, description: '...'};
@@ -200,7 +202,8 @@ class App extends Component {
     flowchart['flow'][loopHeaderNodeID] = {
       nodeID: loopHeaderNodeID,
       nodeType: "LOOP_HEAD",
-      nextNodeID: loopCondNodeID
+      nextNodeID: loopCondNodeID,
+      loopCondNodeID: loopCondNodeID
     };
     flowchart['nodes'][loopHeaderNodeID] = {nodeID: loopHeaderNodeID, description: '...'};
 
