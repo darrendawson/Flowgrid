@@ -59,22 +59,22 @@
   background-color: grey;
 }
 
-#EDGE .vertical_line {
+#EDGE .edge_container .vertical_line {
   width: 2px;
   flex-grow: 1;
 }
 
-#EDGE .empty_vertical_line {
+#EDGE .edge_container .empty_vertical_line {
   width: 2px;
   flex-grow: 1;
 }
 
-#EDGE .horizontal_line {
+#EDGE .edge_container .horizontal_line {
   height: 2px;
   flex-grow: 1;
 }
 
-#EDGE .empty_horizontal_line {
+#EDGE .edge_container .empty_horizontal_line {
   height: 2px;
   flex-grow: 1;
 }
@@ -94,4 +94,54 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
+}
+
+
+/* Select Parent Node --------------------------------------------------------*/
+
+#EDGE #edge_container_select_parent {
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+}
+
+#EDGE #edge_container_select_parent .center_space {
+  width: 15px;
+  height: 15px;
+}
+
+#EDGE #edge_container_select_parent .vertical_line {
+  width: 5px;
+  flex-grow: 1;
+  background-color: grey;
+}
+
+#EDGE #edge_container_select_parent .vertical_line:hover {
+  cursor: pointer;
+  background-color: #15ea7f;
+}
+
+#EDGE #edge_container_select_parent .empty_vertical_line {
+  width: 2px;
+  flex-grow: 1;
+}
+
+#EDGE #edge_container_select_parent .horizontal_line {
+  height: 5px;
+  flex-grow: 1;
+  background-color: grey;
+}
+
+#EDGE #edge_container_select_parent .horizontal_line:hover {
+  background-color: #15ea7f;
+  cursor: pointer;
+}
+
+#EDGE #edge_container_select_parent .empty_horizontal_line {
+  height: 2px;
+  flex-grow: 1;
 }

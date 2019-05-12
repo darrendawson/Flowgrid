@@ -15,7 +15,9 @@ class Edge extends Component {
     this.state = {
       mouseHoverActive: false,
       selectNewNodeTypeActive: false,
+      selectParentNodeActive: false,
 
+      newNodeType: false,
       verticalLineCSS: verticalLineCSS,
       horizontalLineCSS: horizontalLineCSS
     }
@@ -24,23 +26,57 @@ class Edge extends Component {
 
   // onClick -------------------------------------------------------------------
 
-  onClick_CreateNewNode = (nodeType) => {
+  // selects a node type for the new node
+  // if there's only one parent, automatically calls createNewNode()
+  onClick_SelectNodeType = (nodeType) => {
 
     let nodes = this.getActiveNodes();
     if (nodes.length === 0) {
       return;
+    } else if (nodes.length === 1) {
+      this.onClick_CreateNewNode(nodes[0]['parentNodeID'], nodeType);
+      return;
+    } else if (nodes.length > 1) {
+      this.setState({selectParentNodeActive: true, newNodeType: nodeType});
+      return;
+    }
+  }
+
+
+  // will create a new node in <Flowchart/>
+  // nodeType is optional so it can either come from:
+  // - <Edge/>.state  (if there are multiple possible parents)
+  // - args           (if called directly by onClick_SelectNodeType())
+  onClick_CreateNewNode = (parentNodeID, nodeType = false) => {
+
+    // get childNodeID from active nodes
+    let nodes = this.getActiveNodes();
+    let childNodeID = false;
+    for (let i = 0; i < nodes.length && childNodeID === false; i++) {
+      if (nodes[i]['parentNodeID'] === parentNodeID) {
+        childNodeID = nodes[i]['childNodeID'];
+      }
     }
 
-    let parentNodeID = nodes[0]['parentNodeID'];
-    let childNodeID = nodes[0]['childNodeID'];
+    // if childNode doesn't exist, we can't do anything
+    if (!childNodeID) {
+      return;
+    }
 
-    if (nodeType === "COMMAND") {
+    // insert the new node
+    if (this.state.newNodeType === "COMMAND" || nodeType === "COMMAND") {
       this.props.insertNewCommandNode(parentNodeID, childNodeID);
-    } else if (nodeType === "IF") {
+    } else if (this.state.newNodeType === "IF" || nodeType === "IF") {
       this.props.insertNewIfNode(parentNodeID, childNodeID);
     }
 
-    this.setState({mouseHoverActive: false, selectNewNodeTypeActive: false});
+    // clear <Edge/> state
+    this.setState({
+      mouseHoverActive: false,
+      selectNewNodeTypeActive: false,
+      selectParentNodeActive: false,
+      newNodeType: false
+    });
   }
 
 
@@ -52,16 +88,35 @@ class Edge extends Component {
   getActiveNodes = () => {
     let activeNodes = [];
     for (let i = 0; i < this.props.nodes.length; i++) {
-      let nodes = this.props.nodes[i];
-      if (nodes['createNewNodesActive']) {
+      let parentChildNodes = this.props.nodes[i];
+      if (parentChildNodes['createNewNodesActive']) {
         activeNodes.push({
-          parentNodeID: nodes['parentNodeID'],
-          childNodeID: nodes['childNodeID'],
+          parentNodeID: parentChildNodes['parentNodeID'],
+          childNodeID: parentChildNodes['childNodeID'],
           createNewNodesActive: true
         });
       }
     }
     return activeNodes;
+  }
+
+  // gets relative directions of Active parentNodes to current edge
+  // reverses lookup order so you reference by a nodeID by its relative direction (instead of visa versa)
+  getActiveParentNodeDirections = () => {
+
+    let parentNodeDirections = {};
+
+    for (let i = 0; i < this.props.nodes.length; i++) {
+      let parentChildNodes = this.props.nodes[i];
+      if (parentChildNodes['createNewNodesActive']) {
+
+        let parentID = parentChildNodes['parentNodeID'];
+        let parentDirection = this.props.parentDirections[parentID];
+        parentNodeDirections[parentDirection] = parentID;
+      }
+    }
+
+    return parentNodeDirections;
   }
 
   // makes sure that an <Edge/> with no activeNodes will render grey
@@ -81,27 +136,7 @@ class Edge extends Component {
     }
   }
 
-  // Render --------------------------------------------------------------------
-
-
-  renderCreateButton = () => {
-
-    let nodes = this.getActiveNodes();
-    if (nodes.length === 0) {
-      return;
-    }
-
-    let parentNodeID = nodes[0]['parentNodeID'];
-    let childNodeID = nodes[0]['childNodeID'];
-
-    return (
-      <button
-        id="create_button"
-        onClick={() => this.setState({selectNewNodeTypeActive: true})}
-        >+
-      </button>
-    );
-  }
+  // Render Line Types ---------------------------------------------------------
 
   //
   renderVertical = () => {
@@ -288,6 +323,75 @@ class Edge extends Component {
   }
 
 
+  // Render --------------------------------------------------------------------
+
+  // renders menu for selecting which parent is the real parent
+  renderSelectParentNode = () => {
+
+    // get IDs for parent nodes
+    let parentNodeDirections = this.getActiveParentNodeDirections();
+    let upParentID = parentNodeDirections['up'];
+    let upRightParentID = parentNodeDirections['up_right'];
+
+    return (
+      <div id="edge_container_select_parent">
+
+        {/* UP parent*/}
+        <div className="vertical_line" onClick={() => this.onClick_CreateNewNode(upParentID)}></div>
+        <div className="row">
+          <div className="empty_horizontal_line"></div>
+          <div className="center_space"></div>
+
+          {/* UP-RIGHT parent*/}
+          <div className="horizontal_line" onClick={() => this.onClick_CreateNewNode(upRightParentID)}></div>
+        </div>
+        <div className="empty_vertical_line"></div>
+      </div>
+    );
+  }
+
+  // renders menu for selecting the type of a new node
+  renderSelectNewNodeType = () => {
+    return (
+      <div className="choose_node_type_container">
+        <button
+          className="pick_new_node_type_button"
+          onClick={() => this.onClick_SelectNodeType("COMMAND")}
+          >Command
+        </button>
+
+        <button
+          className="pick_new_node_type_button"
+          onClick={() => this.onClick_SelectNodeType("IF")}
+          >If
+        </button>
+        <button className="pick_new_node_type_button">Loop</button>
+      </div>
+    );
+  }
+
+
+  // create button is the big plus you press to initiate creating a new node
+  renderCreateButton = () => {
+
+    let nodes = this.getActiveNodes();
+    if (nodes.length === 0) {
+      return;
+    }
+
+    let parentNodeID = nodes[0]['parentNodeID'];
+    let childNodeID = nodes[0]['childNodeID'];
+
+    return (
+      <button
+        id="create_button"
+        onClick={() => this.setState({selectNewNodeTypeActive: true})}
+        >+
+      </button>
+    );
+  }
+
+
   // edge has 2 options for rendering:
   // 1) User has not clicked the createNewNode button
   //    -> renders as an edge
@@ -298,28 +402,13 @@ class Edge extends Component {
     //
     if (this.state.selectNewNodeTypeActive) {
 
-      if (this.getActiveNodes().length === 1) {
-        return (
-          <div className="choose_node_type_container">
-            <button
-              className="pick_new_node_type_button"
-              onClick={() => this.onClick_CreateNewNode("COMMAND")}
-              >Command
-            </button>
+      let activeParentNodes = this.getActiveParentNodeDirections();
 
-            <button
-              className="pick_new_node_type_button"
-              onClick={() => this.onClick_CreateNewNode("IF")}
-              >If
-            </button>
-            <button className="pick_new_node_type_button">Loop</button>
-          </div>
-        );
+      if (this.state.selectParentNodeActive) {
+        return this.renderSelectParentNode();
 
       } else {
-        return (
-          <p>{JSON.stringify(this.props.parentDirections)}</p>
-        );
+        return this.renderSelectNewNodeType();
       }
 
 
@@ -359,6 +448,7 @@ class Edge extends Component {
 
 
 
+  // renders the <Edge/>
   render() {
 
     // call this in the render function because of weird props/constructor issues
@@ -367,7 +457,7 @@ class Edge extends Component {
     return (
       <div id="EDGE"
         onMouseEnter={() => this.setState({mouseHoverActive: true})}
-        onMouseLeave={() => this.setState({mouseHoverActive: false, selectNewNodeTypeActive: false})}>
+        onMouseLeave={() => this.setState({mouseHoverActive: false, selectNewNodeTypeActive: false, selectParentNodeActive: false, newNodeType: false})}>
         {this.renderEdge()}
       </div>
     );
