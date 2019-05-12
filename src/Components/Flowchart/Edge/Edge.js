@@ -298,22 +298,29 @@ class Edge extends Component {
     //
     if (this.state.selectNewNodeTypeActive) {
 
-      return (
-        <div className="choose_node_type_container">
-          <button
-            className="pick_new_node_type_button"
-            onClick={() => this.onClick_CreateNewNode("COMMAND")}
-            >Command
-          </button>
+      if (this.getActiveNodes().length === 1) {
+        return (
+          <div className="choose_node_type_container">
+            <button
+              className="pick_new_node_type_button"
+              onClick={() => this.onClick_CreateNewNode("COMMAND")}
+              >Command
+            </button>
 
-          <button
-            className="pick_new_node_type_button"
-            onClick={() => this.onClick_CreateNewNode("IF")}
-            >If
-          </button>
-          <button className="pick_new_node_type_button">Loop</button>
-        </div>
-      );
+            <button
+              className="pick_new_node_type_button"
+              onClick={() => this.onClick_CreateNewNode("IF")}
+              >If
+            </button>
+            <button className="pick_new_node_type_button">Loop</button>
+          </div>
+        );
+
+      } else {
+        return (
+          <p>{JSON.stringify(this.props.parentDirections)}</p>
+        );
+      }
 
 
     } else {
@@ -354,6 +361,7 @@ class Edge extends Component {
 
   render() {
 
+    // call this in the render function because of weird props/constructor issues
     this.fixLineColors();
 
     return (

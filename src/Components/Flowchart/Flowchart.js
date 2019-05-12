@@ -561,7 +561,7 @@ class Flowchart extends Component {
   getNewEdgeObject = (direction, parentID, childNodeID, createNewNodesActive, parentDirection) => {
 
     let parentDirectionsObject = {
-      parentID: parentDirection
+      [parentID]: parentDirection
     };
 
     let edgeObject = {
@@ -587,7 +587,7 @@ class Flowchart extends Component {
     }
 
 
-    // combine list of node directions
+    // combine list of (parent->child) node connections
     let nodes = [];
     for (let i = 0; i < edge1['nodes'].length; i++) {
       nodes.push(edge1['nodes'][i]);
@@ -597,15 +597,26 @@ class Flowchart extends Component {
       nodes.push(edge2['nodes'][i]);
     }
 
+    // combine parentNode directions
+    // this keeps track of where parents are relative to the current edge
+    // which is helpful for inserting new nodes in edges that have multiple parents
+    let edgeParents = {};
+    for (let parentNodeID in edge1['parentDirections']) {
+      edgeParents[parentNodeID] = edge1['parentDirections'][parentNodeID];
+    }
+    for (let parentNodeID in edge2['parentDirections']) {
+      edgeParents[parentNodeID] = edge2['parentDirections'][parentNodeID];
+    }
+
+
     // if edges are the same or can't be combined, then return them
-    if (edge1['direction'] === edge2['direction']) {
+    if (edge1['direction'] === edge2['direction'] || edge1['direction'] === "vertical_horizontal") {
       edge1['nodes'] = nodes;
-      return edge1;
-    } else if (edge1['direction'] === "vertical_horizontal") {
-      edge1['nodes'] = nodes;
+      edge1['parentDirections'] = edgeParents;
       return edge1;
     } else if (edge2['direction'] === "vertical_horizontal") {
       edge2['nodes'] = nodes;
+      edge2['parentDirections'] = edgeParents;
       return edge2;
     }
 
@@ -634,7 +645,7 @@ class Flowchart extends Component {
       (edgeTypes.includes('vertical_right') && edgeTypes.includes('down_right')) ||
       (edgeTypes.includes('vertical') && edgeTypes.includes('vertical_right'))
     ) {
-      return {"type": "edge", "direction": "vertical_right", "nodes": nodes};
+      return {"type": "edge", "direction": "vertical_right", "nodes": nodes, "parentDirections": edgeParents};
     }
 
     else if (
@@ -645,7 +656,7 @@ class Flowchart extends Component {
       (edgeTypes.includes('up_horizontal') && edgeTypes.includes('up_right'))||
       (edgeTypes.includes('horizontal') && edgeTypes.includes('up_horizontal'))
     ) {
-      return {"type": "edge", "direction": "up_horizontal", "nodes": nodes};
+      return {"type": "edge", "direction": "up_horizontal", "nodes": nodes, "parentDirections": edgeParents};
     }
 
     else if (
@@ -656,7 +667,7 @@ class Flowchart extends Component {
       (edgeTypes.includes('vertical_left') && edgeTypes.includes('down_left')) ||
       (edgeTypes.includes('vertical') && edgeTypes.includes('vertical_left'))
     ) {
-      return {"type": "edge", "direction": "vertical_left", "nodes": nodes};
+      return {"type": "edge", "direction": "vertical_left", "nodes": nodes, "parentDirections": edgeParents};
     }
 
     else if (
@@ -667,7 +678,7 @@ class Flowchart extends Component {
       (edgeTypes.includes('down_horizontal') && edgeTypes.includes('down_right')) ||
       (edgeTypes.includes('down') && edgeTypes.includes('down_horizontal'))
     ) {
-      return {"type": "edge", "direction": "down_horizontal", "nodes": nodes};
+      return {"type": "edge", "direction": "down_horizontal", "nodes": nodes, "parentDirections": edgeParents};
     }
 
 
@@ -703,7 +714,7 @@ class Flowchart extends Component {
       (edgeTypes.includes('down_horizontal') && edgeTypes.includes('vertical'))
     ) {
 
-      return {"type": "edge", "direction": "vertical_horizontal", "nodes": nodes};
+      return {"type": "edge", "direction": "vertical_horizontal", "nodes": nodes, "parentDirections": edgeParents};
     }
 
   }
@@ -732,6 +743,7 @@ class Flowchart extends Component {
       <Edge
         direction={edge['direction']}
         nodes={edge['nodes']}
+        parentDirections={edge['parentDirections']}
         insertNewCommandNode={this.insertNewCommandNode}
         insertNewIfNode={this.insertNewIfNode}
       />
