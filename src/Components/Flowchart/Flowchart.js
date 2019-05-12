@@ -472,7 +472,7 @@ class Flowchart extends Component {
       */
 
       for (let i = nodeA_Row + 1; i < nodeB_Row; i++) {
-        newEdge = {"type": "edge", "direction": "vertical", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": true}]};
+        newEdge = this.getNewEdgeObject("vertical", nodeA_ID, nodeB_ID, true, "up");
         currentEdge = grid[i][nodeA_Column];
         grid[i][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
       }
@@ -484,7 +484,7 @@ class Flowchart extends Component {
           [Node A] -> [Node B]
       */
       for (let i = nodeA_Column + 1; i < nodeB_Column; i++) {
-        newEdge = {"type": "edge", "direction": "horizontal", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": true}]};
+        newEdge = this.getNewEdgeObject("horizontal", nodeA_ID, nodeB_ID, true, "left");
         currentEdge = grid[nodeA_Row][i];
         grid[nodeA_Row][i] = this.combineTwoEdges(newEdge, currentEdge);
       }
@@ -502,26 +502,26 @@ class Flowchart extends Component {
 
       // add edge directly under NodeA that
       for (let i = nodeA_Row + 1; i < nodeB_Row - 1; i++) {
-        newEdge = {"type": "edge", "direction": "vertical", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": true}]};
+        newEdge = this.getNewEdgeObject("vertical", nodeA_ID, nodeB_ID, true, "up");
         currentEdge = grid[i][nodeA_Column];
         grid[i][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
       }
 
       // add up_left
-      newEdge = {"type": "edge", "direction": "up_left", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": true}]};
+      newEdge = this.getNewEdgeObject("up_left", nodeA_ID, nodeB_ID, true, "up");
       currentEdge = grid[nodeB_Row - 1][nodeA_Column];
       grid[nodeB_Row - 1][nodeA_Column] = this.combineTwoEdges(newEdge, currentEdge);
 
 
       // add horizontal edges
       for (let i = nodeB_Column + 1; i < nodeA_Column; i++) {
-        newEdge = {"type": "edge", "direction": "horizontal", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": true}]};
+        newEdge = this.getNewEdgeObject("horizontal", nodeA_ID, nodeB_ID, true, "up_right");
         currentEdge = grid[nodeB_Row + 1][i];
         grid[nodeB_Row - 1][i] = this.combineTwoEdges(newEdge, currentEdge);
       }
 
       // Add edge to connect to edge above Node B
-      newEdge = {"type": "edge", "direction": "down_right", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": true}]};
+      newEdge = this.getNewEdgeObject("down_right", nodeA_ID, nodeB_ID, true, "up_right");
       currentEdge = grid[nodeB_Row - 1][nodeB_Column];
       grid[nodeB_Row - 1][nodeB_Column] = this.combineTwoEdges(newEdge, currentEdge);
 
@@ -536,24 +536,42 @@ class Flowchart extends Component {
       */
 
       // add edge directly to left of nodeA
-      newEdge = {"type": "edge", "direction": "up_right", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": false}]};
+      newEdge = this.getNewEdgeObject("up_right", nodeA_ID, nodeB_ID, false, "down_right");
       currentEdge = grid[nodeA_Row][nodeA_Column - 1];
       grid[nodeA_Row][nodeA_Column - 1] = this.combineTwoEdges(newEdge, currentEdge);
 
       // add edge directly to left of nodeB
-      newEdge = {"type": "edge", "direction": "down_right", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": false}]};
+      newEdge = this.getNewEdgeObject("down_right", nodeA_ID, nodeB_ID, false, "down_right");
       currentEdge = grid[nodeB_Row][nodeB_Column - 1];
       grid[nodeB_Row][nodeB_Column - 1] = this.combineTwoEdges(newEdge, currentEdge);
 
       // add vertical edges between nodeA and nodeB
       for (let i = nodeB_Row + 1; i < nodeA_Row; i++) {
-        newEdge = {"type": "edge", "direction": "vertical", "nodes": [{"parentNodeID": nodeA_ID, "childNodeID": nodeB_ID, "createNewNodesActive": false}]};
+        newEdge = this.getNewEdgeObject("vertical", nodeA_ID, nodeB_ID, false, "right");
         currentEdge = grid[i][nodeA_Column - 1];
         grid[i][nodeA_Column - 1] = this.combineTwoEdges(newEdge, currentEdge);
       }
     }
 
     return grid;
+  }
+
+
+  // creates a new Edge JS object for insertEdgesForNodePairIntoGrid()
+  getNewEdgeObject = (direction, parentID, childNodeID, createNewNodesActive, parentDirection) => {
+
+    let parentDirectionsObject = {
+      parentID: parentDirection
+    };
+
+    let edgeObject = {
+      "type": "edge",
+      "direction": direction,
+      "nodes": [{"parentNodeID": parentID, "childNodeID": childNodeID, "createNewNodesActive": createNewNodesActive}],
+      "parentDirections": parentDirectionsObject
+    };
+
+    return edgeObject;
   }
 
 
