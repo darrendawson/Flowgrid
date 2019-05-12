@@ -13,41 +13,44 @@ class Flowchart extends Component {
 
   // Insert Node Functionality -------------------------------------------------
 
+
+  // inserts a node into the flowchart
   // given parent and child node, insert node between them
   // -> this function should check to see if the parentNode type is an ifNode
   //  - If it is, then make sure it calls insertEmptyCommandNodeIntoFlowchart() with proper declarations
+  insertNewNode = (newNodeType, parentNodeID, childNodeID) => {
+
+    let flowchart = this.props.flowchart;
+
+    // determine whether the parent node is an if statement
+    // and if it is, determine whether the child node is on the ifTrue or ifFalse path
+    let parentTookIfTrue = false;
+    if (flowchart['flow'][parentNodeID]['nodeType'] === "IF") {
+      parentTookIfTrue = (flowchart['flow'][parentNodeID]['nextNodeID_IfTrue'] === childNodeID);
+    }
+
+    // perform insert
+    if (newNodeType === "COMMAND") {
+      flowchart = this.props.insertEmptyCommandNode(flowchart, parentNodeID, parentTookIfTrue);
+    } else if (newNodeType === "IF") {
+      flowchart = this.props.insertEmptyIfNode(flowchart, parentNodeID, parentTookIfTrue);
+    }
+
+    // update state of <Flowchart/>
+    this.props.updateFlowchart(flowchart);
+  }
+
+
+  // calls insertNewNode, this function gets passed to <Edge/>
   insertNewCommandNode = (parentNodeID, childNodeID) => {
-
-    let flowchart = this.props.flowchart;
-
-    // determine whether the parent node is an if statement
-    // and if it is, determine whether the child node is on the ifTrue or ifFalse path
-    let parentTookIfTrue = false;
-    if (flowchart['flow'][parentNodeID]['nodeType'] === "IF") {
-      parentTookIfTrue = (flowchart['flow'][parentNodeID]['nextNodeID_IfTrue'] === childNodeID);
-    }
-
-
-    flowchart = this.props.insertEmptyCommandNode(flowchart, parentNodeID, parentTookIfTrue);
-    this.props.updateFlowchart(flowchart);
+    this.insertNewNode("COMMAND", parentNodeID, childNodeID)
   }
 
-
-  // same as insertNewCommandNode, but for an IF node
+  // calls insertNewNode, this function gets passed to <Edge/>
   insertNewIfNode = (parentNodeID, childNodeID) => {
-
-    let flowchart = this.props.flowchart;
-
-    // determine whether the parent node is an if statement
-    // and if it is, determine whether the child node is on the ifTrue or ifFalse path
-    let parentTookIfTrue = false;
-    if (flowchart['flow'][parentNodeID]['nodeType'] === "IF") {
-      parentTookIfTrue = (flowchart['flow'][parentNodeID]['nextNodeID_IfTrue'] === childNodeID);
-    }
-
-    flowchart = this.props.insertEmptyIfNode(flowchart, parentNodeID, parentTookIfTrue);
-    this.props.updateFlowchart(flowchart);
+    this.insertNewNode("IF", parentNodeID, childNodeID);
   }
+
 
   // Branch Dependencies -------------------------------------------------------
   /*
