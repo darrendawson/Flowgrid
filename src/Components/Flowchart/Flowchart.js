@@ -34,6 +34,8 @@ class Flowchart extends Component {
       flowchart = this.props.insertEmptyCommandNode(flowchart, parentNodeID, parentTookIfTrue);
     } else if (newNodeType === "IF") {
       flowchart = this.props.insertEmptyIfNode(flowchart, parentNodeID, parentTookIfTrue);
+    } else if (newNodeType === "LOOP") {
+      flowchart = this.props.insertEmptyLoopNode(flowchart, parentNodeID, parentTookIfTrue);
     }
 
     // update state of <Flowchart/>
@@ -49,6 +51,11 @@ class Flowchart extends Component {
   // calls insertNewNode, this function gets passed to <Edge/>
   insertNewIfNode = (parentNodeID, childNodeID) => {
     this.insertNewNode("IF", parentNodeID, childNodeID);
+  }
+
+  // calls insertNewNode
+  insertNewLoopNode = (parentNodeID, childNodeID) => {
+    this.insertNewNode("LOOP", parentNodeID, childNodeID);
   }
 
 
@@ -749,6 +756,7 @@ class Flowchart extends Component {
         parentDirections={edge['parentDirections']}
         insertNewCommandNode={this.insertNewCommandNode}
         insertNewIfNode={this.insertNewIfNode}
+        insertNewLoopNode={this.insertNewLoopNode}
       />
     );
   }

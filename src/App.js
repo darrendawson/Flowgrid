@@ -292,6 +292,7 @@ class App extends Component {
           flowchart={this.state.flowchart}
           insertEmptyCommandNode={this.insertEmptyCommandNode}
           insertEmptyIfNode={this.insertEmptyIfNode}
+          insertEmptyLoopNode={this.insertEmptyLoopNode}
           updateFlowchart={this.updateFlowchart}
         />
       </div>

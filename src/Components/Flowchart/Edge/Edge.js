@@ -68,6 +68,8 @@ class Edge extends Component {
       this.props.insertNewCommandNode(parentNodeID, childNodeID);
     } else if (this.state.newNodeType === "IF" || nodeType === "IF") {
       this.props.insertNewIfNode(parentNodeID, childNodeID);
+    } else if (this.state.newNodeType === "LOOP" || nodeType === "LOOP") {
+      this.props.insertNewLoopNode(parentNodeID, childNodeID);
     }
 
     // clear <Edge/> state
@@ -365,7 +367,9 @@ class Edge extends Component {
           onClick={() => this.onClick_SelectNodeType("IF")}
           >If
         </button>
-        <button className="pick_new_node_type_button">Loop</button>
+        <button className="pick_new_node_type_button"
+          onClick={() => this.onClick_SelectNodeType("LOOP")}
+          >Loop</button>
       </div>
     );
   }
