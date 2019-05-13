@@ -15,8 +15,15 @@ class Node extends Component {
   }
 
   render() {
+
+    // a selected node will have  a border highlight
+    let nodeCSS = (this.props.nodeSelected) ? "selected" : "";
+
     return (
-      <div className="Node">
+      <div
+        id="NODE"
+        className={nodeCSS}
+        onClick={this.props.selectNode}>
         <p>{this.props.nodeType}</p>
         <p>{this.props.nodeID}</p>
       </div>

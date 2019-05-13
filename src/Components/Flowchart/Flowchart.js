@@ -9,7 +9,117 @@ class Flowchart extends Component {
 
   constructor() {
     super();
+
+    this.state = {
+      selectedNodeID: false
+    };
   }
+
+  // ===========================================================================
+  // Build Flowchart To Render
+  // ===========================================================================
+  /*
+    - Functions that take in props.flowchart and converts it into a 2D grid to render
+
+    Major Steps:
+      - determine branch dependencies (nested IF statements)
+      - use branch dependencies to figure out how large each branch will be
+      - use branch sizes to place nodes into a 2D grid that has space for nodes and edges
+      - add Edges between parent-child nodes into the grid
+  */
+
+  // Grid ----------------------------------------------------------------------
+
+
+  // converts a flowchart into a grid
+  getFlowchartAsGrid = (flowchart) => {
+
+    // get (row, col) location pairs for each node in the flowchart
+    // -> calculates nested IfNode branch dependencies to make sure there aren't any collisions
+    let branchDependencies = this.getAllBranchDependencies(flowchart);
+    let branchSizes = this.getBranchSizes(flowchart, branchDependencies);
+    let nodeLocations = this.getNodeLocations(flowchart, branchSizes, flowchart['rootNodeID']);
+    nodeLocations = this.addEdgeDistanceToNodeLocations(nodeLocations);
+    let grid = this.createEmptyGrid(nodeLocations);
+
+
+
+    // Add edges between nodes
+    for (let nodeID in nodeLocations) {
+
+      let node = flowchart['flow'][nodeID];
+
+      // add edges
+      if (node['nodeType'] === "END") {
+        // don't draw any edges coming out of the END type node
+      } else if (node['nodeType'] === "IF") {
+        // add edges for both branches of if statement
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfFalse']);
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfTrue']);
+
+      } else if (node['nodeType'] === "LOOP_COND") {
+        // loop conditional nodes are like IF statements, except the "ifTrue" points at a previous node in the flowchart
+        // ifTrue (loop back up) is stored as 'loopHeadNodeID'
+        // ifFalse (break from loop) is stored as 'nextNodeID'
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['loopHeadNodeID']);
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
+      } else {
+        // otherwise, node only points to one more node
+        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
+      }
+    }
+
+
+    // Add nodes into the grid
+    for (let nodeID in nodeLocations) {
+      let nodeRow = nodeLocations[nodeID]['row'];
+      let nodeCol = nodeLocations[nodeID]['col'];
+      grid[nodeRow][nodeCol] = {"type": "node", "nodeID": nodeID};
+    }
+
+
+    // return the grid
+    return grid;
+  }
+
+
+  // creates an empty 2D array that can accomodate all the nodes inside of a flowchart
+  // - get maxRow and maxCol in nodeLocations to figure out how large it should be
+  // - array accessed by grid[row][col]
+  createEmptyGrid = (nodeLocations) => {
+
+    // get the dimensions of the grid
+    let maxRow = 0;
+    let maxCol = 0;
+    for (let nodeID in nodeLocations) {
+      maxRow = (nodeLocations[nodeID]['row'] > maxRow) ? nodeLocations[nodeID]['row'] : maxRow;
+      maxCol = (nodeLocations[nodeID]['col'] > maxCol) ? nodeLocations[nodeID]['col'] : maxCol;
+    }
+
+    // create the grid
+    let grid = [];
+    for (let i = 0; i <= maxRow; i++) {
+      let gridRow = [];
+      for (let j = 0; j <= maxCol; j++) {
+        gridRow.push(0);
+      }
+      grid.push(gridRow);
+    }
+
+    return grid;
+  }
+
+
+  // nodeLocations starts off as just nodes
+  // this function will create empty rows / columns between nodes that act as space for edges
+  addEdgeDistanceToNodeLocations = (nodeLocations) => {
+    for (let nodeID in nodeLocations) {
+      nodeLocations[nodeID]['row'] = nodeLocations[nodeID]['row'] * 2 + 1;
+      nodeLocations[nodeID]['col'] = nodeLocations[nodeID]['col'] * 2 + 1;
+    }
+    return nodeLocations;
+  }
+
 
   // Insert Node Functionality -------------------------------------------------
 
@@ -362,96 +472,6 @@ class Flowchart extends Component {
   }
 
 
-  // Grid ----------------------------------------------------------------------
-
-  // creates an empty 2D array that can accomodate all the nodes inside of a flowchart
-  // - get maxRow and maxCol in nodeLocations to figure out how large it should be
-  // - array accessed by grid[row][col]
-  createEmptyGrid = (nodeLocations) => {
-
-    // get the dimensions of the grid
-    let maxRow = 0;
-    let maxCol = 0;
-    for (let nodeID in nodeLocations) {
-      maxRow = (nodeLocations[nodeID]['row'] > maxRow) ? nodeLocations[nodeID]['row'] : maxRow;
-      maxCol = (nodeLocations[nodeID]['col'] > maxCol) ? nodeLocations[nodeID]['col'] : maxCol;
-    }
-
-    // create the grid
-    let grid = [];
-    for (let i = 0; i <= maxRow; i++) {
-      let gridRow = [];
-      for (let j = 0; j <= maxCol; j++) {
-        gridRow.push(0);
-      }
-      grid.push(gridRow);
-    }
-
-    return grid;
-  }
-
-
-  // nodeLocations starts off as just nodes
-  // this function will create empty rows / columns between nodes that act as space for edges
-  addEdgeDistanceToNodeLocations = (nodeLocations) => {
-    for (let nodeID in nodeLocations) {
-      nodeLocations[nodeID]['row'] = nodeLocations[nodeID]['row'] * 2 + 1;
-      nodeLocations[nodeID]['col'] = nodeLocations[nodeID]['col'] * 2 + 1;
-    }
-    return nodeLocations;
-  }
-
-
-  // converts a flowchart into a grid
-  getFlowchartAsGrid = (flowchart) => {
-
-    // get (row, col) location pairs for each node in the flowchart
-    // -> calculates nested IfNode branch dependencies to make sure there aren't any collisions
-    let branchDependencies = this.getAllBranchDependencies(flowchart);
-    let branchSizes = this.getBranchSizes(flowchart, branchDependencies);
-    let nodeLocations = this.getNodeLocations(flowchart, branchSizes, flowchart['rootNodeID']);
-    nodeLocations = this.addEdgeDistanceToNodeLocations(nodeLocations);
-    let grid = this.createEmptyGrid(nodeLocations);
-
-
-
-    // Add edges between nodes
-    for (let nodeID in nodeLocations) {
-
-      let node = flowchart['flow'][nodeID];
-
-      // add edges
-      if (node['nodeType'] === "END") {
-        // don't draw any edges coming out of the END type node
-      } else if (node['nodeType'] === "IF") {
-        // add edges for both branches of if statement
-        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfFalse']);
-        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID_IfTrue']);
-
-      } else if (node['nodeType'] === "LOOP_COND") {
-        // loop conditional nodes are like IF statements, except the "ifTrue" points at a previous node in the flowchart
-        // ifTrue (loop back up) is stored as 'loopHeadNodeID'
-        // ifFalse (break from loop) is stored as 'nextNodeID'
-        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['loopHeadNodeID']);
-        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
-      } else {
-        // otherwise, node only points to one more node
-        grid = this.insertEdgesForNodePairIntoGrid(grid, nodeLocations, nodeID, node['nextNodeID']);
-      }
-    }
-
-
-    // Add nodes into the grid
-    for (let nodeID in nodeLocations) {
-      let nodeRow = nodeLocations[nodeID]['row'];
-      let nodeCol = nodeLocations[nodeID]['col'];
-      grid[nodeRow][nodeCol] = {"type": "node", "nodeID": nodeID};
-    }
-
-
-    // return the grid
-    return grid;
-  }
 
 
   // Edges ---------------------------------------------------------------------
@@ -729,8 +749,33 @@ class Flowchart extends Component {
 
   }
 
-  // Render --------------------------------------------------------------------
+  // ===========================================================================
+  // Selected Node
+  // ===========================================================================
+  /*
+    - Functions for when a user selects a node
 
+    Major Responsibilites:
+      - onClick to make sure user can select a node
+      - Display sidebar so user can see details about a node
+      - Display sidebar so user can edit details about a node through the sidebar
+  */
+
+  // onClick -------------------------------------------------------------------
+
+  // lets a user select a node
+  onClick_SelectNode = (nodeID) => {
+    if (nodeID !== this.state.selectedNodeID) {
+      this.setState({selectedNodeID: nodeID});
+    }
+  }
+
+  // ===========================================================================
+  // Render
+  // ===========================================================================
+  /*
+    - Functions for rendering
+  */
 
   // renders a <Node/>
   renderNode = (flowchart, nodeID) => {
@@ -743,6 +788,8 @@ class Flowchart extends Component {
         nodeID={nodeID}
         nodeType={node['nodeType']}
         nodeDescription={nodeDetails['description']}
+        nodeSelected={nodeID === this.state.selectedNodeID}
+        selectNode={() => this.onClick_SelectNode(nodeID)}
       />
     );
   }
