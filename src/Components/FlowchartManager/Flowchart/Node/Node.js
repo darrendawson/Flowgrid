@@ -17,17 +17,34 @@ class Node extends Component {
   render() {
 
     // a selected node will have  a border highlight
-    let nodeCSS = (this.props.nodeSelected) ? "selected" : "";
+    if (this.props.nodeType === "IF") {
 
-    return (
-      <div
-        id="NODE"
-        className={nodeCSS}
-        onClick={this.props.selectNode}>
-        <p>{this.props.nodeType} ({this.props.nodeID})</p>
-        <p>{this.props.nodeDescription}</p>
-      </div>
-    );
+      let nodeCSS = (this.props.nodeSelected) ? "diamond_selected" : "diamond";
+
+      return (
+        <div id="NODE" onClick={this.props.selectNode}>
+          <div className={nodeCSS}>
+            <div className="diamond_content">
+              <p>{this.props.nodeDescription}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    else {
+      let nodeCSS = (this.props.nodeSelected) ? "selected" : "";
+
+      return (
+        <div
+          id="NODE"
+          className={nodeCSS}
+          onClick={this.props.selectNode}>
+          <p>{this.props.nodeType} ({this.props.nodeID})</p>
+          <p>{this.props.nodeDescription}</p>
+        </div>
+      );
+    }
   }
 }
 
