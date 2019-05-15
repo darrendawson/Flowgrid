@@ -298,10 +298,20 @@ class FlowchartManager extends Component {
     super();
 
     this.state = {
+      selectedNodeID: false,
       flowchartFunctions: new FlowchartFunctions()
     };
   }
 
+
+  // Select Node ---------------------------------------------------------------
+
+  // selects a node
+  selectNodeID = (nodeID) => {
+    if (this.state.nodeID !== nodeID) {
+      this.setState({selectedNodeID: nodeID});
+    }
+  }
 
   // Render --------------------------------------------------------------------
 
@@ -310,9 +320,12 @@ class FlowchartManager extends Component {
       <div id="FLOWCHART_MANAGER">
         <Flowchart
           flowchart={this.props.flowchart}
+          selectedNodeID={this.state.selectedNodeID}
+
           insertEmptyCommandNode={this.state.flowchartFunctions.insertEmptyCommandNode}
           insertEmptyIfNode={this.state.flowchartFunctions.insertEmptyIfNode}
           insertEmptyLoopNode={this.state.flowchartFunctions.insertEmptyLoopNode}
+          selectNode={this.selectNodeID}
           updateFlowchart={this.props.updateFlowchart}
         />
       </div>

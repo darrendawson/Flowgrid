@@ -9,10 +9,6 @@ class Flowchart extends Component {
 
   constructor() {
     super();
-
-    this.state = {
-      selectedNodeID: false
-    };
   }
 
   // ===========================================================================
@@ -765,9 +761,7 @@ class Flowchart extends Component {
 
   // lets a user select a node
   onClick_SelectNode = (nodeID) => {
-    if (nodeID !== this.state.selectedNodeID) {
-      this.setState({selectedNodeID: nodeID});
-    }
+    this.props.selectNode(nodeID);
   }
 
   // ===========================================================================
@@ -788,7 +782,7 @@ class Flowchart extends Component {
         nodeID={nodeID}
         nodeType={node['nodeType']}
         nodeDescription={nodeDetails['description']}
-        nodeSelected={nodeID === this.state.selectedNodeID}
+        nodeSelected={nodeID === this.props.selectedNodeID}
         selectNode={() => this.onClick_SelectNode(nodeID)}
       />
     );
