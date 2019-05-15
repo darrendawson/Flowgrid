@@ -11,6 +11,21 @@ class FlowchartSidebar extends Component {
     super();
   }
 
+  // Update Node Info ----------------------------------------------------------
+
+  // updates the description parameter of this node
+  updateNodeDescription = (event) => {
+    let flowchart = this.props.flowchart;
+    let newDescription = event.target.value;
+
+    if (this.props.nodeDescription !== newDescription) {
+      flowchart['nodes'][this.props.nodeID]['description'] = newDescription;
+      this.props.updateFlowchart(flowchart);
+    }
+  }
+
+
+
   // Render --------------------------------------------------------------------
 
   render() {
@@ -23,10 +38,17 @@ class FlowchartSidebar extends Component {
           </div>
           <button id="close_sidebar_button" onClick={this.props.closeSidebar}>X</button>
         </div>
-        <div className="divider"></div>
 
-        <div className="row_flex_between">
-          <p>{this.props.nodeDescription}</p>
+        <div className="divider"></div>
+        <div className="empty_row"></div>
+
+        <h3 className="section_title">Node Tag</h3>          
+        <div className="row_flex_center">
+          <input
+            className="description_input"
+            value={this.props.nodeDescription}
+            onChange={this.updateNodeDescription.bind(this)}
+          />
         </div>
       </div>
     );

@@ -275,7 +275,6 @@ class FlowchartFunctions {
     }
   }
 
-
 }
 
 
@@ -361,10 +360,13 @@ class FlowchartManager extends Component {
 
           <div id="right_container">
             <FlowchartSidebar
+              flowchart={this.props.flowchart}
               nodeID={nodeDetails['nodeID']}
               nodeType={nodeFlow['nodeType']}
               nodeDescription={nodeDetails['description']}
+
               closeSidebar={() => this.setState({selectedNodeID: false})}
+              updateFlowchart={this.props.updateFlowchart}
             />
           </div>
         </div>

@@ -24,8 +24,8 @@ class Node extends Component {
         id="NODE"
         className={nodeCSS}
         onClick={this.props.selectNode}>
-        <p>{this.props.nodeType}</p>
-        <p>{this.props.nodeID}</p>
+        <p>{this.props.nodeType} ({this.props.nodeID})</p>
+        <p>{this.props.nodeDescription}</p>
       </div>
     );
   }
