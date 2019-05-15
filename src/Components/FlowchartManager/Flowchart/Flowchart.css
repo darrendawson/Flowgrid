@@ -25,7 +25,7 @@
 #FLOWCHART .grid_row_with_if {
   display: flex;
   flex-direction: row;
-  height: 130px;
+  height: 134px;
   flex-shrink: 0;
 }
 
@@ -34,7 +34,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  width: 130px;
+  width: 134px;
 }
 
 #FLOWCHART .grid_col_no_nodes {

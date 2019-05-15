@@ -143,7 +143,7 @@ class FlowchartFunctions {
       nextNodeID_IfFalse: ifFalseNodeID,
       mergeNodeID: mergeNodeID
     };
-    flowchart['nodes'][ifNodeID] = {nodeID: ifNodeID, description: '...'};
+    flowchart['nodes'][ifNodeID] = {nodeID: ifNodeID, description: 'IF'};
 
     // create the ifTrue and ifFalse command Nodes and add them to flowchart
     flowchart['flow'][ifFalseNodeID] = {
@@ -151,14 +151,14 @@ class FlowchartFunctions {
       nodeType: "COMMAND",
       nextNodeID: mergeNodeID
     };
-    flowchart['nodes'][ifFalseNodeID] = {nodeID: ifFalseNodeID, description: '...'};
+    flowchart['nodes'][ifFalseNodeID] = {nodeID: ifFalseNodeID, description: '(false)'};
 
     flowchart['flow'][ifTrueNodeID] = {
       nodeID: ifTrueNodeID,
       nodeType: "COMMAND",
       nextNodeID: mergeNodeID
     }
-    flowchart['nodes'][ifTrueNodeID] = {nodeID: ifTrueNodeID, description: '...'};
+    flowchart['nodes'][ifTrueNodeID] = {nodeID: ifTrueNodeID, description: '(true)'};
 
     // add the mergeNode to the flowchart
     flowchart['flow'][mergeNodeID] = {
@@ -166,7 +166,7 @@ class FlowchartFunctions {
       nodeType: "MERGE",
       nextNodeID: childNodeID
     };
-    flowchart['nodes'][mergeNodeID] = {nodeID: mergeNodeID, description: '...'};
+    flowchart['nodes'][mergeNodeID] = {nodeID: mergeNodeID, description: 'merge'};
 
     return flowchart;
   }
@@ -210,7 +210,7 @@ class FlowchartFunctions {
       nextNodeID_IfFalse: mergeNodeID,
       mergeNodeID: mergeNodeID
     };
-    flowchart['nodes'][ifNodeID] = {nodeID: ifNodeID, description: '...'};
+    flowchart['nodes'][ifNodeID] = {nodeID: ifNodeID, description: 'IF'};
 
     // add loop nodes
     flowchart['flow'][loopHeaderNodeID] = {
@@ -219,7 +219,7 @@ class FlowchartFunctions {
       nextNodeID: loopCondNodeID,
       loopCondNodeID: loopCondNodeID
     };
-    flowchart['nodes'][loopHeaderNodeID] = {nodeID: loopHeaderNodeID, description: '...'};
+    flowchart['nodes'][loopHeaderNodeID] = {nodeID: loopHeaderNodeID, description: 'Start Loop'};
 
     flowchart['flow'][loopCondNodeID] = {
       nodeID: loopCondNodeID,
@@ -227,7 +227,7 @@ class FlowchartFunctions {
       nextNodeID: mergeNodeID,
       loopHeadNodeID: loopHeaderNodeID
     }
-    flowchart['nodes'][loopCondNodeID] = {nodeID: loopCondNodeID, description: '...'};
+    flowchart['nodes'][loopCondNodeID] = {nodeID: loopCondNodeID, description: 'End Loop'};
 
     // add Merge node
     flowchart['flow'][mergeNodeID] = {
@@ -235,7 +235,7 @@ class FlowchartFunctions {
       nodeType: "MERGE",
       nextNodeID: childNodeID
     };
-    flowchart['nodes'][mergeNodeID] = {nodeID: mergeNodeID, description: '...'};
+    flowchart['nodes'][mergeNodeID] = {nodeID: mergeNodeID, description: 'merge'};
 
     return flowchart;
   }
