@@ -828,16 +828,28 @@ class Flowchart extends Component {
 
       let rowToRender = [];
       let onlyEdgesInRow = true; // rows with only edges will be shorter
+      let ifNodeInRow = false;   // rows with IF nodes are slightly taller
 
       // build up columns in the row
       for (let j = 0; j < nodeGrid[i].length; j++) {
 
-        // get Column type (even columns are edge only)
+        // get Column type (even numbered columns are edge only)
         let colCSS = (j % 2 === 0) ? "grid_col_no_nodes" : "grid_col";
 
         // render a node
         if (nodeGrid[i][j]['type'] === "node") {
-          onlyEdgesInRow = false;
+
+          // flag that there is a node in this row (merge nodes count as edges)
+          let nodeID = nodeGrid[i][j]['nodeID'];
+          if (flowchart['flow'][nodeID]['nodeType'] !== "MERGE") {
+            onlyEdgesInRow = false;
+          }
+
+          // check to see if Node is an IF node
+          if (flowchart['flow'][nodeID]['nodeType'] === "IF") {
+            ifNodeInRow = true;
+          }
+
           rowToRender.push(
             <div className={colCSS}>
               {this.renderNode(flowchart, nodeGrid[i][j]['nodeID'])}
@@ -860,8 +872,16 @@ class Flowchart extends Component {
         }
       }
 
-      // add Row to grid
-      let rowCSS = (onlyEdgesInRow) ? "grid_row_no_nodes" : "grid_row";
+      // determine Row CSS and add to grid
+      let rowCSS;
+      if (onlyEdgesInRow) {
+        rowCSS = "grid_row_no_nodes";
+      } else if (ifNodeInRow) {
+        rowCSS = "grid_row_with_if";
+      } else {
+        rowCSS = "grid_row";
+      }
+
       gridToRender.push(
         <div className={rowCSS}>
           {rowToRender}

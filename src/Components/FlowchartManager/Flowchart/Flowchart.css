@@ -7,6 +7,7 @@
 }
 
 
+
 #FLOWCHART .grid_row {
   display: flex;
   flex-direction: row;
@@ -21,6 +22,12 @@
   flex-shrink: 0;
 }
 
+#FLOWCHART .grid_row_with_if {
+  display: flex;
+  flex-direction: row;
+  height: 130px;
+  flex-shrink: 0;
+}
 
 #FLOWCHART .grid_col {
   display: flex;
