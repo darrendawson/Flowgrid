@@ -13,17 +13,19 @@
 
 
 #NODE .diamond {
-  height: 100px;
-  width: 100px;
+  height: 95px;
+  width: 95px;
+  border-radius: 3px;
   border: 1px solid white;
   transform: rotate(45deg);
   position: relative;
 }
 
 #NODE .diamond_selected {
-  height: 100px;
-  width: 100px;
+  height: 95px;
+  width: 95px;
   border: 1px solid red;
+  border-radius: 3px;
   transform: rotate(45deg);
   position: relative;
 }
@@ -34,4 +36,18 @@
   transform: rotate(-45deg);
   position: absolute;
   top: 0px;
+}
+
+#NODE .rectangle {
+  padding: 0px 10px 0px 10px;
+  min-width: 60px;
+  border-radius: 3px;
+  border: 1px solid white;
+}
+
+#NODE .rectangle_selected {
+  padding: 0px 10px 0px 10px;
+  min-width: 60px;
+  border-radius: 3px;
+  border: 1px solid red;
 }

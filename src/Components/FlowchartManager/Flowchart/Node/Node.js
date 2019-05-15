@@ -8,6 +8,8 @@
 import React, { Component } from 'react';
 import './Node.css';
 
+import Edge from '../Edge/Edge.js';
+
 class Node extends Component {
 
   constructor() {
@@ -33,15 +35,15 @@ class Node extends Component {
     }
 
     else {
-      let nodeCSS = (this.props.nodeSelected) ? "selected" : "";
+
+      // all other node types are represented as rectangles
+      let nodeCSS = (this.props.nodeSelected) ? "rectangle_selected" : "rectangle";
 
       return (
-        <div
-          id="NODE"
-          className={nodeCSS}
-          onClick={this.props.selectNode}>
-          <p>{this.props.nodeType} ({this.props.nodeID})</p>
-          <p>{this.props.nodeDescription}</p>
+        <div id="NODE" onClick={this.props.selectNode}>
+          <div className={nodeCSS}>
+            <p>{this.props.nodeDescription}</p>
+          </div>
         </div>
       );
     }

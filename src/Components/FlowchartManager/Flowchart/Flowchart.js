@@ -772,20 +772,33 @@ class Flowchart extends Component {
   */
 
   // renders a <Node/>
+  // -> If a node is a merge type, render an edge instead!
   renderNode = (flowchart, nodeID) => {
 
     let node = flowchart['flow'][nodeID];
     let nodeDetails = flowchart['nodes'][nodeID];
 
-    return (
-      <Node
-        nodeID={nodeID}
-        nodeType={node['nodeType']}
-        nodeDescription={nodeDetails['description']}
-        nodeSelected={nodeID === this.props.selectedNodeID}
-        selectNode={() => this.onClick_SelectNode(nodeID)}
-      />
-    );
+    if (node['nodeType'] === "MERGE") {
+      let edgeObject = {
+        'direction': 'vertical',
+        'nodes': [{'parentNodeID': nodeID, 'childNodeID': node['nextNodeID'], 'createNewNodesActive': true}],
+        'parentDirections': {'up': nodeID}
+      };
+
+      return this.renderEdge(edgeObject);
+
+    } else {
+      return (
+        <Node
+          nodeID={nodeID}
+          nextNodeID={node['nextNodeID']}
+          nodeType={node['nodeType']}
+          nodeDescription={nodeDetails['description']}
+          nodeSelected={nodeID === this.props.selectedNodeID}
+          selectNode={() => this.onClick_SelectNode(nodeID)}
+        />
+      );
+    }
   }
 
   // renders an <Edge/>
