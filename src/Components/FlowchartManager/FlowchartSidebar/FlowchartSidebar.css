@@ -1,0 +1,52 @@
+#FLOWCHART_SIDEBAR {
+  height: 100%;
+  width: calc(100% - 1px);
+  border-left: 1px solid #1e1d1e;
+  background-color: #292929;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: auto;
+}
+
+#FLOWCHART_SIDEBAR .row_flex_between {
+  width: calc(100% - 20px);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#FLOWCHART_SIDEBAR .row_flex_start {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+#FLOWCHART_SIDEBAR #node_title {
+  margin-right: 20px;
+}
+
+#FLOWCHART_SIDEBAR #node_type {
+  color: grey;
+}
+
+#FLOWCHART_SIDEBAR #close_sidebar_button {
+  background-color: inherit;
+  border: none;
+  color: grey;
+  font-size: 2.0em;
+  cursor: pointer;
+}
+
+#FLOWCHART_SIDEBAR #close_sidebar_button:hover {
+  color: white;
+}
+
+#FLOWCHART_SIDEBAR .divider {
+  width: calc(100% - 30px);
+  height: 1px;
+  background-color: #1e1d1e;
+}

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './FlowchartManager.css';
 
 import Flowchart from './Flowchart/Flowchart.js';
+import FlowchartSidebar from './FlowchartSidebar/FlowchartSidebar.js';
 
 // =============================================================================
 // FlowChart Functions
@@ -308,7 +309,7 @@ class FlowchartManager extends Component {
 
   // selects a node
   selectNodeID = (nodeID) => {
-    if (this.state.nodeID !== nodeID) {
+    if (this.state.nodeID !== nodeID && this.props.flowchart['flow'][nodeID]['nodeType'] !== "MERGE") {
       this.setState({selectedNodeID: nodeID});
     }
   }
@@ -316,20 +317,60 @@ class FlowchartManager extends Component {
   // Render --------------------------------------------------------------------
 
   render() {
-    return (
-      <div id="FLOWCHART_MANAGER">
-        <Flowchart
-          flowchart={this.props.flowchart}
-          selectedNodeID={this.state.selectedNodeID}
 
-          insertEmptyCommandNode={this.state.flowchartFunctions.insertEmptyCommandNode}
-          insertEmptyIfNode={this.state.flowchartFunctions.insertEmptyIfNode}
-          insertEmptyLoopNode={this.state.flowchartFunctions.insertEmptyLoopNode}
-          selectNode={this.selectNodeID}
-          updateFlowchart={this.props.updateFlowchart}
-        />
-      </div>
-    );
+    if (this.state.selectedNodeID === false) {
+      return (
+        <div id="FLOWCHART_MANAGER">
+          <div id="full_container">
+            <Flowchart
+              flowchart={this.props.flowchart}
+              selectedNodeID={this.state.selectedNodeID}
+
+              insertEmptyCommandNode={this.state.flowchartFunctions.insertEmptyCommandNode}
+              insertEmptyIfNode={this.state.flowchartFunctions.insertEmptyIfNode}
+              insertEmptyLoopNode={this.state.flowchartFunctions.insertEmptyLoopNode}
+              selectNode={this.selectNodeID}
+              updateFlowchart={this.props.updateFlowchart}
+            />
+          </div>
+        </div>
+      );
+
+
+    } else {
+
+      let nodeDetails = this.props.flowchart['nodes'][this.state.selectedNodeID];
+      let nodeFlow = this.props.flowchart['flow'][this.state.selectedNodeID];
+
+      // render with sidebar to show node details
+      return (
+        <div id="FLOWCHART_MANAGER">
+
+          <div id="left_container">
+            <Flowchart
+              flowchart={this.props.flowchart}
+              selectedNodeID={this.state.selectedNodeID}
+
+              insertEmptyCommandNode={this.state.flowchartFunctions.insertEmptyCommandNode}
+              insertEmptyIfNode={this.state.flowchartFunctions.insertEmptyIfNode}
+              insertEmptyLoopNode={this.state.flowchartFunctions.insertEmptyLoopNode}
+              selectNode={this.selectNodeID}
+              updateFlowchart={this.props.updateFlowchart}
+            />
+          </div>
+
+          <div id="right_container">
+            <FlowchartSidebar
+              nodeID={nodeDetails['nodeID']}
+              nodeType={nodeFlow['nodeType']}
+              nodeDescription={nodeDetails['description']}
+              closeSidebar={() => this.setState({selectedNodeID: false})}
+            />
+          </div>
+        </div>
+      );
+    }
+
   }
 }
 
