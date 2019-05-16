@@ -1,6 +1,56 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## FlowGrid: Flowcharts in React
 
-## Available Scripts
+FlowGrid demos a functioning Flowchart built exclusively with React.js components and no external libraries.
+This chart renders as a 2D grid of nodes, edges, and empty spaces so it doesn't need to use <canvas/> elements.
+
+<FlowchartManager/> is the component to interface with.
+It contains:
+ - <Flowchart/>             Renders the Flowchart as a grid  
+ - <FlowchartSidebar/>      Renders details about selected Node and lets user modify them
+
+
+## How to Use
+
+Flowgrid isn't on NPM. To add Flowgrid to your React project:
+
+1. Copy and paste all code nested in ./src/Components/FlowchartManager into your React project
+2. import {FlowchartManager, FlowchartFunctions} from FlowchartManager.js
+    (FlowchartManager is the component, FlowchartFunctions is a class with functions for manipulating a flowchart)
+3. Declare an instance of FlowchartFunctions
+4. Use it to create a Flowchart object and pass it to <FlowchartManager/>. You'll need to pass in an updateFlowchart function as a prop as well.
+
+Basically, just look at App.js and use the code there!
+
+
+## Flowgrid Object
+
+A flowchart object is a JS object of form:
+{
+  'rootNodeID': "",
+  'flow': {nodeID: nodeFlowDetails, ....},
+  'nodes': {nodeID: nodeDetails, ....}
+}
+
+Where:
+nodeFlowDetails = {
+  'nodeID': "",
+  'nextNodeID': "",
+  'nextNodeID_IfTrue': "",    // used for branching
+  'nextNodeID_IfFalse': ""    // used for branching
+}
+
+And:
+nodeDetails = {
+  'nodeID': "",
+  'description': ""
+}
+
+You should expand on what's inside nodeDetails to fit your particular use case.
+
+
+## React Configuration
+
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 In the project directory, you can run:
 
@@ -12,57 +62,4 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 The page will reload if you make edits.<br>
 You will also see any lint errors in the console.
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
